@@ -11,8 +11,12 @@
 #include <JuceHeader.h>
 
 //==============================================================================
-/**
-*/
+// Declare aliases 
+using Filter = juce::dsp::IIR::Filter<float>;
+using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+
+
 class GiONAudioProcessor  : public juce::AudioProcessor
 {
 public:
@@ -53,7 +57,29 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    juce::AudioProcessorValueTreeState apvts;
+
 private:
     //==============================================================================
+    // Parameters
+    juce::AudioParameterFloat* stage1GainPtr, stage2GainPtr;
+    juce::AudioParameterFloat* stage1CrunchPtr, stage2CrunchPtr;
+    juce::AudioParameterFloat* stage1VolumePtr, stage2VolumeGainPtr;
+    juce::AudioParameterFloat* stage1PreGainTonePtr, stage1PostGainTonePtr, stage2PreGainTonePtr, stage2PostGainTonePtr;
+    juce::AudioParameterFloat* boostGainPtr, boostMidGainPtr, boostMidFrequencyPtr;
+
+    juce::AudioParameterBool* stage1BypassPtr, stage2BypassPtr;
+    juce::AudioParameterBool* boostBypassPtr;
+    juce::AudioParameterBool* boostMidBypassPtr;
+
+    juce::AudioParameterChoice* boostLocationChoicePtr;
+
+    //==============================================================================
+    // Filters
+    MonoChain leftChain, rightChain;
+    Filter stage1PreGainToneFilter, stage1PostGainToneFilter, stage2PreGainToneFilter, stage2PostGainToneFilter;
+    Filter boostMidFilter;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GiONAudioProcessor)
 };
