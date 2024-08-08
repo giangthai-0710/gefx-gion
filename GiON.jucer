@@ -6,6 +6,9 @@
               pluginVST3Category="Distortion,Fx" pluginFormats="buildStandalone,buildVST3">
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
+      <FILE id="x73Tl7" name="DistortionDSP.cpp" compile="1" resource="0"
+            file="Source/DistortionDSP.cpp"/>
+      <FILE id="tka25n" name="DistortionDSP.h" compile="0" resource="0" file="Source/DistortionDSP.h"/>
       <FILE id="ksmbaU" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="D7ayaJ" name="PluginProcessor.h" compile="0" resource="0"
