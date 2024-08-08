@@ -139,6 +139,7 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    parametersStruct parameters = getParametersFromTree(apvts);
     updateParameters();
 
     // This is where the audio processing happens
@@ -147,8 +148,14 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         auto* channelData = buffer.getWritePointer (channel);
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
 		{
-			channelData[sample] = stage1Distortion.process(channelData[sample]);
-            channelData[sample] = stage2Distortion.process(channelData[sample]);
+            if (!parameters.stage1Bypass)
+            {
+                channelData[sample] = stage1Distortion.process(channelData[sample]);
+            }
+            if (!parameters.stage2Bypass)
+			{
+				channelData[sample] = stage2Distortion.process(channelData[sample]);
+			}
 		}
     }
 }
@@ -209,6 +216,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
                                                            juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
                                                            0.5f));
 
+    layout.add(std::make_unique<juce::AudioParameterBool>("stage1Bypass",
+                                                          "Stage 1 Bypass",
+														   false));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("stage2Bypass",
+                                                          "Stage 2 Bypass",
+														   false));
     return layout;
 }
 
@@ -222,6 +236,9 @@ parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts
     parameters.stage2Gain = apvts.getRawParameterValue("stage2Gain")->load();
     parameters.stage1Volume = apvts.getRawParameterValue("stage1Volume")->load();
     parameters.stage2Volume = apvts.getRawParameterValue("stage2Volume")->load();
+
+    parameters.stage1Bypass = apvts.getRawParameterValue("stage1Bypass")->load();
+    parameters.stage2Bypass = apvts.getRawParameterValue("stage2Bypass")->load();
 
     return parameters;
 }

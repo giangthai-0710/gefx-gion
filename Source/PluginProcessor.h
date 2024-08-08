@@ -27,6 +27,8 @@ struct parametersStruct
           stage1PreGainTone { 0 }, stage2PreGainTone { 0 }, 
           stage1PostGainTone { 0 }, stage2PostGainTone { 0 }, 
           boostMidGain { 0 };
+
+    bool stage1Bypass { false }, stage2Bypass { false };
 };
 
 parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts);
