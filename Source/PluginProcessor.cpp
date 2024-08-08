@@ -20,7 +20,7 @@ GiONAudioProcessor::GiONAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        )
-#endif
+#endif 
 {
 }
 
@@ -131,30 +131,32 @@ bool GiONAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) con
 
 void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    // In case we have more output channels than input channels, we'll clear them
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+    parametersStruct parameters = getParametersFromTree(apvts);
+    updateParameters();
+
+    // This is where the audio processing happens
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+		{
+            if (!parameters.stage1Bypass)
+            {
+                channelData[sample] = stage1Distortion.process(channelData[sample]);
+            }
+            if (!parameters.stage2Bypass)
+			{
+				channelData[sample] = stage2Distortion.process(channelData[sample]);
+			}
+		}
     }
 }
 
@@ -166,7 +168,7 @@ bool GiONAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* GiONAudioProcessor::createEditor()
 {
-    return new GiONAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -183,9 +185,81 @@ void GiONAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
     // whose contents will have been created by the getStateInformation() call.
 }
 
+juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Gain",
+                                                           "Stage 1 Gain",
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Gain",
+                                                           "Stage 2 Gain",
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           0.5f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Crunch", 
+                                                           "Stage 1 Crunch", 
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 
+                                                           0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Crunch",
+														   "Stage 2 Crunch",
+														   juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+														   0.5f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Volume",
+                                                           "Stage 1 Volume",
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Volume",
+                                                           "Stage 2 Volume",
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           0.5f));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("stage1Bypass",
+                                                          "Stage 1 Bypass",
+														   false));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("stage2Bypass",
+                                                          "Stage 2 Bypass",
+														   false));
+    return layout;
+}
+
+parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts)
+{
+    parametersStruct parameters;
+
+    parameters.stage1Crunch = apvts.getRawParameterValue("stage1Crunch")->load();
+    parameters.stage2Crunch = apvts.getRawParameterValue("stage2Crunch")->load();
+    parameters.stage1Gain = apvts.getRawParameterValue("stage1Gain")->load();
+    parameters.stage2Gain = apvts.getRawParameterValue("stage2Gain")->load();
+    parameters.stage1Volume = apvts.getRawParameterValue("stage1Volume")->load();
+    parameters.stage2Volume = apvts.getRawParameterValue("stage2Volume")->load();
+
+    parameters.stage1Bypass = apvts.getRawParameterValue("stage1Bypass")->load();
+    parameters.stage2Bypass = apvts.getRawParameterValue("stage2Bypass")->load();
+
+    return parameters;
+}
+
+void GiONAudioProcessor::updateParameters()
+{
+    auto parameters = getParametersFromTree(apvts);
+
+    stage1Distortion.setCrunch(parameters.stage1Crunch);
+    stage2Distortion.setCrunch(parameters.stage2Crunch);
+    stage1Distortion.setGain(parameters.stage1Gain);
+    stage2Distortion.setGain(parameters.stage2Gain);
+    stage1Distortion.setVolume(parameters.stage1Volume);
+    stage2Distortion.setVolume(parameters.stage2Volume);
+
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new GiONAudioProcessor();
 }
+
