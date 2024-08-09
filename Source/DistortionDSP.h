@@ -12,6 +12,8 @@ public:
 
     //==============================================================================
     void setCrunch(float crunch);
+    void setTilt(float tilt);
+    void setDCOffset(float offset);
     void setGain(float gain);
     void setVolume(float volume);
 
@@ -26,29 +28,43 @@ private:
     //==============================================================================
     // Distortion parameters
     float crunch;
+    float tilt;
+    float dcOffset;
     float gain;
     float volume;
     
-    const float dcOffset = 0.17f;
+    float tiltAbsolute;
 
     //==============================================================================
     float preGainProcessing(float sample)
     {
-        return 5.0f * gain * (sample + dcOffset);
+        sample =  5.0f * gain * (sample + dcOffset);
+
+        if (sample > 0.0f && tilt > 0.0f)
+        {
+            sample *= tiltAbsolute;
+        }
+        else if (sample < 0.0f && tilt < 0.0f)
+		{
+			sample *= tiltAbsolute;
+		}
+
+		return sample;
     }
 
     float softestDistortion(float sample)
 	{
-		return (2.0f  / juce::MathConstants<float>::pi) * std::atan(juce::MathConstants<float>::pi / 2 * sample);
+        return (2.0f / juce::MathConstants<float>::pi) * std::atan(juce::MathConstants<float>::pi / 2 * sample);
 	}
 
     float softDistortion(float sample)
     {
+        
         return std::tanh(sample);
     }
 
     float mediumDistortion(float sample)
-	{
+	{      
         return std::erf(sample * 1.414f);
 	}
 
@@ -58,7 +74,7 @@ private:
 		{
 			return 1.0f;
 		}
-		else if(sample <= 0.66f && sample >= 0.33f)
+		else if(sample <= 0.66f && sample > 0.33f)
 		{
 			return -3.0f * sample * sample + 4.0f * sample - 1.0f / 3.0f;
 		}
@@ -74,7 +90,7 @@ private:
 		{
 			return 3.0f * sample * sample + 4.0f * sample + 1.0f / 3.0f;
 		}
-		else
+		else if (sample < -0.66f)
 		{
 			return -1.0f;
 		}

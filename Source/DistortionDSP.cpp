@@ -5,6 +5,8 @@ DistortionDSP::DistortionDSP()
 	this->crunch = 0.0f;
 	this->gain = 0.0f;
 	this->volume = 0.0f;
+	this->dcOffset = 0.0f;
+	this->tilt = 0.0f;
 }
 
 DistortionDSP::~DistortionDSP()
@@ -16,6 +18,17 @@ void DistortionDSP::setCrunch(float crunch)
 	this->crunch = crunch;
 }
 
+void DistortionDSP::setTilt(float tilt)
+{
+	this->tilt = tilt;
+	this->tiltAbsolute = fabs(tilt);
+}
+
+void DistortionDSP::setDCOffset(float offset)
+{
+	this->dcOffset = offset;
+}
+
 void DistortionDSP::setGain(float gain)
 {
 	this->gain = gain;
@@ -25,6 +38,8 @@ void DistortionDSP::setVolume(float volume)
 {
 	this->volume = volume;
 }
+
+
 
 float DistortionDSP::getCrunch()
 {

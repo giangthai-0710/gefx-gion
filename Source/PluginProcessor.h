@@ -23,12 +23,14 @@ struct parametersStruct
 {
     float stage1Gain { 0 }, stage2Gain { 0 },
           stage1Crunch { 0 }, stage2Crunch { 0 }, 
+          stage1Tilt { 0 }, stage2Tilt { 0 },
+          stage1Offset { 0 }, stage2Offset { 0 },
           stage1Volume { 0 }, stage2Volume { 0 }, 
           stage1PreGainTone { 0 }, stage2PreGainTone { 0 }, 
           stage1PostGainTone { 0 }, stage2PostGainTone { 0 }, 
           boostMidGain { 0 };
 
-    bool stage1Bypass { false }, stage2Bypass { false };
+    bool stage1Bypass{ false }, stage2Bypass{ false }, antiAliasingBypass{ false };
 };
 
 parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts);
@@ -80,15 +82,6 @@ public:
 
 private:
     //==============================================================================
-    // Parameters
-    //juce::AudioParameterFloat* stage1GainPtr, stage2GainPtr;
-    //juce::AudioParameterFloat* stage1CrunchPtr, stage2CrunchPtr;
-    //juce::AudioParameterFloat* stage1VolumePtr, stage2VolumePtr;
-    //juce::AudioParameterFloat* stage1PreGainTonePtr, stage2PreGainTonePtr;
-    //juce::AudioParameterFloat* stage1PostGainTonePtr, stage2PostGainTonePtr;
-    //juce::AudioParameterFloat* boostMidGainPtr;
-
-    //==============================================================================
     // Filters
     MonoChain leftAntiAliasingChain, rightAntiAliasingChain;
     Filter stage1PreGainToneFilter, stage1PostGainToneFilter, stage2PreGainToneFilter, stage2PostGainToneFilter;
@@ -97,6 +90,9 @@ private:
     //==============================================================================
     // Distortion
     DistortionDSP stage1Distortion, stage2Distortion;
+
+    juce::dsp::StateVariableTPTFilter<float> antiAliasingFilter;
+    juce::dsp::ProcessSpec processSpec;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GiONAudioProcessor)

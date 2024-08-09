@@ -22,6 +22,9 @@ GiONAudioProcessor::GiONAudioProcessor()
                        )
 #endif 
 {
+    antiAliasingFilter.setCutoffFrequency(20000.0f);
+    antiAliasingFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+    antiAliasingFilter.setResonance(0.7071f);
 }
 
 GiONAudioProcessor::~GiONAudioProcessor()
@@ -93,8 +96,12 @@ void GiONAudioProcessor::changeProgramName (int index, const juce::String& newNa
 //==============================================================================
 void GiONAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    processSpec.sampleRate = sampleRate;
+    processSpec.maximumBlockSize = samplesPerBlock;
+    processSpec.numChannels = getTotalNumOutputChannels();
+
+    antiAliasingFilter.prepare(processSpec);
+    antiAliasingFilter.reset();
 }
 
 void GiONAudioProcessor::releaseResources()
@@ -141,6 +148,15 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
     parametersStruct parameters = getParametersFromTree(apvts);
     updateParameters();
+
+    // Anti-aliasing filter
+    auto myBlock = juce::dsp::AudioBlock<float>(buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float>(myBlock);
+
+    if (!parameters.antiAliasingBypass)
+	{
+        antiAliasingFilter.process(context);
+	}
 
     // This is where the audio processing happens
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -191,11 +207,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Gain",
                                                            "Stage 1 Gain",
-                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           juce::NormalisableRange<float>(1.0f, 10.0f, 0.1f),
                                                            0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Gain",
                                                            "Stage 2 Gain",
-                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           juce::NormalisableRange<float>(1.0f, 10.0f, 0.1f),
                                                            0.5f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Crunch", 
@@ -206,6 +222,24 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
 														   "Stage 2 Crunch",
 														   juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
 														   0.5f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Tilt", 
+                                                           "Stage 1 Tilt", 
+                                                           juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
+                                                           0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Tilt",
+                                                           "Stage 2 Tilt",
+														   juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
+														   0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Offset",
+														   "Stage 1 Offset",
+														   juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
+														   0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Offset",
+                                                           "Stage 2 Offset",
+														   juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
+														   0.0f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Volume",
                                                            "Stage 1 Volume",
@@ -223,6 +257,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
     layout.add(std::make_unique<juce::AudioParameterBool>("stage2Bypass",
                                                           "Stage 2 Bypass",
 														   false));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("antiAliasingBypass",
+														  "Anti Aliasing Bypass",
+														   false));
     return layout;
 }
 
@@ -232,6 +270,10 @@ parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts
 
     parameters.stage1Crunch = apvts.getRawParameterValue("stage1Crunch")->load();
     parameters.stage2Crunch = apvts.getRawParameterValue("stage2Crunch")->load();
+    parameters.stage1Tilt = apvts.getRawParameterValue("stage1Tilt")->load();
+    parameters.stage2Tilt = apvts.getRawParameterValue("stage2Tilt")->load();
+    parameters.stage1Offset = apvts.getRawParameterValue("stage1Offset")->load();
+    parameters.stage2Offset = apvts.getRawParameterValue("stage2Offset")->load();
     parameters.stage1Gain = apvts.getRawParameterValue("stage1Gain")->load();
     parameters.stage2Gain = apvts.getRawParameterValue("stage2Gain")->load();
     parameters.stage1Volume = apvts.getRawParameterValue("stage1Volume")->load();
@@ -239,6 +281,7 @@ parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts
 
     parameters.stage1Bypass = apvts.getRawParameterValue("stage1Bypass")->load();
     parameters.stage2Bypass = apvts.getRawParameterValue("stage2Bypass")->load();
+    parameters.antiAliasingBypass = apvts.getRawParameterValue("antiAliasingBypass")->load();
 
     return parameters;
 }
@@ -249,6 +292,10 @@ void GiONAudioProcessor::updateParameters()
 
     stage1Distortion.setCrunch(parameters.stage1Crunch);
     stage2Distortion.setCrunch(parameters.stage2Crunch);
+    stage1Distortion.setTilt(parameters.stage1Tilt);
+    stage2Distortion.setTilt(parameters.stage2Tilt);
+    stage1Distortion.setDCOffset(parameters.stage1Offset);
+    stage2Distortion.setDCOffset(parameters.stage2Offset);
     stage1Distortion.setGain(parameters.stage1Gain);
     stage2Distortion.setGain(parameters.stage2Gain);
     stage1Distortion.setVolume(parameters.stage1Volume);
