@@ -26,11 +26,11 @@ GiONAudioProcessor::GiONAudioProcessor()
     antiAliasingFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
     antiAliasingFilter.setResonance(0.7071f);
 
-    preGainHighPassFilter.setCutoffFrequency(20.0f);
+    preGainHighPassFilter.setCutoffFrequency(25.0f);
     preGainHighPassFilter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
     preGainHighPassFilter.setResonance(0.7071f);
 
-    postGainLowPassFilter.setCutoffFrequency(5000.0f);
+    postGainLowPassFilter.setCutoffFrequency(8000.0f);
     postGainLowPassFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
     postGainLowPassFilter.setResonance(0.7071f);
 }
@@ -116,6 +116,8 @@ void GiONAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
     postGainLowPassFilter.prepare(processSpec);
     postGainLowPassFilter.reset();
+
+
 }
 
 void GiONAudioProcessor::releaseResources()
@@ -162,15 +164,27 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
     parametersStruct parameters = getParametersFromTree(apvts);
     updateParameters();
+    updateFilters();
 
-    // Anti-aliasing filter
+    // Context for the audio block
     auto myBlock = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(myBlock);
 
+    auto leftBlock = myBlock.getSingleChannelBlock(0);
+    auto rightBlock = myBlock.getSingleChannelBlock(1);
+
+    auto leftContext = juce::dsp::ProcessContextReplacing<float>(leftBlock);
+    auto rightContext = juce::dsp::ProcessContextReplacing<float>(rightBlock);
+
+    // Anti-aliasing filter
     antiAliasingFilter.process(context);
     preGainHighPassFilter.process(context);
 
-    // This is where the audio processing happens
+    // Pre distortion filters
+    preStageLeftFilter.process(leftContext);
+    preStageRightFilter.process(rightContext);
+
+    // Stage 1 distortion
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
@@ -180,14 +194,36 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             {
                 channelData[sample] = stage1Distortion.process(channelData[sample]);
             }
-            if (!parameters.stage2Bypass)
-			{
-				channelData[sample] = stage2Distortion.process(channelData[sample]);
-			}
 		}
     }
 
+    // Post stage 1 filters
+    postStage1LeftFilter.process(leftContext);
+    postStage1RightFilter.process(rightContext);
+
+    // Stage 2 distortion
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            if (!parameters.stage2Bypass)
+            {
+                channelData[sample] = stage2Distortion.process(channelData[sample]);
+            }
+        }
+    }
+
+    // Post gain low pass filter to avoid aliasing
     postGainLowPassFilter.process(context);
+
+    // Post stage 2 filters
+    postStage2LeftFilter.process(leftContext);
+    postStage2RightFilter.process(rightContext);
+
+    // Mid boost filter
+    midBoostLeftFilter.process(leftContext);
+    midBoostRightFilter.process(rightContext);
 }
 
 //==============================================================================
@@ -246,6 +282,36 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
                                                            juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
                                                            0.0f));
 
+    // Filters
+    layout.add(std::make_unique<juce::AudioParameterFloat>("preStageBassGain", 
+                                                           "Pre Stage Bass Gain",
+                                                           juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
+                                                           0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("preStageTrebleGain",
+                                                           "Pre Stage Treble Gain",
+														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
+														   0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage1BassGain",
+                                                           "Post Stage 1 Bass Gain", 
+														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
+														   0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage1TrebleGain",
+                                                           "Post Stage 1 Treble Gain",
+														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
+														   0.0f)); 
+    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage2BassGain",
+                                                           "Post Stage 2 Bass Gain",
+														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
+														   0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage2TrebleGain",
+                                                           "Post Stage 2 Treble Gain",
+														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
+														   0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("midBoostGain",
+                                                           "Mid Boost Gain",
+														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
+														   0.0f));
+
     layout.add(std::make_unique<juce::AudioParameterBool>("stage1Bypass",
                                                           "Stage 1 Bypass",
 														   false));
@@ -267,6 +333,14 @@ parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts
     parameters.stage1Volume = apvts.getRawParameterValue("stage1Volume")->load();
     parameters.stage2Volume = apvts.getRawParameterValue("stage2Volume")->load();
 
+    parameters.preStageBassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("preStageBassGain")->load());
+    parameters.preStageTrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("preStageTrebleGain")->load());
+    parameters.postStage1BassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage1BassGain")->load());
+    parameters.postStage1TrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage1TrebleGain")->load());
+    parameters.postStage2BassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage2BassGain")->load());
+    parameters.postStage2TrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage2TrebleGain")->load());
+    parameters.midBoostGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("midBoostGain")->load());
+
     parameters.stage1Bypass = apvts.getRawParameterValue("stage1Bypass")->load();
     parameters.stage2Bypass = apvts.getRawParameterValue("stage2Bypass")->load();
 
@@ -284,6 +358,61 @@ void GiONAudioProcessor::updateParameters()
     stage1Distortion.setVolume(juce::Decibels::decibelsToGain(parameters.stage1Volume));
     stage2Distortion.setVolume(juce::Decibels::decibelsToGain(parameters.stage2Volume));
 
+    
+}
+
+void GiONAudioProcessor::updateFilters()
+{
+    auto parameters = getParametersFromTree(apvts);
+
+	preStageBassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
+                                                                                   preStageBassFrequency, 
+                                                                                   preStageBassQ, 
+                                                                                   parameters.preStageBassGain);
+    updateCoefficients(preStageLeftFilter.get<FilterType::bassFilter>().coefficients, preStageBassCoefficients);
+    updateCoefficients(preStageRightFilter.get<FilterType::bassFilter>().coefficients, preStageBassCoefficients); 
+    
+    preStageTrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                     preStageTrebleFrequency, 
+                                                                                     preStageTrebleQ, 
+                                                                                     parameters.preStageTrebleGain);
+    updateCoefficients(preStageLeftFilter.get<FilterType::trebleFilter>().coefficients, preStageTrebleCoefficients); 
+    updateCoefficients(preStageRightFilter.get<FilterType::trebleFilter>().coefficients, preStageTrebleCoefficients); 
+
+    postStage1BassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                     postStage1BassFrequency, 
+                                                                                     postStage1BassQ, 
+                                                                                     parameters.postStage1BassGain);
+    updateCoefficients(postStage1LeftFilter.get<FilterType::bassFilter>().coefficients, postStage1BassCoefficients);
+    updateCoefficients(postStage1RightFilter.get<FilterType::bassFilter>().coefficients, postStage1BassCoefficients); 
+
+    postStage1TrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                       postStage1TrebleFrequency, 
+                                                                                       postStage1TrebleQ, 
+                                                                                       parameters.postStage1TrebleGain);
+    updateCoefficients(postStage1LeftFilter.get<FilterType::trebleFilter>().coefficients, postStage1TrebleCoefficients);
+    updateCoefficients(postStage1RightFilter.get<FilterType::trebleFilter>().coefficients, postStage1TrebleCoefficients);
+
+    postStage2BassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                     postStage2BassFrequency, 
+                                                                                     postStage2BassQ,
+                                                                                     parameters.postStage2BassGain);
+    updateCoefficients(postStage2LeftFilter.get<FilterType::bassFilter>().coefficients, postStage2BassCoefficients);
+    updateCoefficients(postStage2RightFilter.get<FilterType::bassFilter>().coefficients, postStage2BassCoefficients);
+
+    postStage2TrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
+                                                                                       postStage2TrebleFrequency,
+                                                                                       postStage2TrebleQ, 
+                                                                                       parameters.postStage2TrebleGain);
+    updateCoefficients(postStage2LeftFilter.get<FilterType::trebleFilter>().coefficients, postStage2TrebleCoefficients);
+    updateCoefficients(postStage2RightFilter.get<FilterType::trebleFilter>().coefficients, postStage2TrebleCoefficients);
+
+    midBoostCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
+                                                                               midBoostFrequency,
+                                                                               midBoostQ,
+                                                                               parameters.midBoostGain);
+    updateCoefficients(midBoostLeftFilter.coefficients, midBoostCoefficients);
+    updateCoefficients(midBoostRightFilter.coefficients, midBoostCoefficients);
 }
 
 //==============================================================================
