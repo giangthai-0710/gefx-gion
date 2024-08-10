@@ -5,8 +5,6 @@ DistortionDSP::DistortionDSP()
 	this->crunch = 0.0f;
 	this->gain = 0.0f;
 	this->volume = 0.0f;
-	this->dcOffset = 0.0f;
-	this->tilt = 0.0f;
 }
 
 DistortionDSP::~DistortionDSP()
@@ -16,17 +14,6 @@ DistortionDSP::~DistortionDSP()
 void DistortionDSP::setCrunch(float crunch)
 {
 	this->crunch = crunch;
-}
-
-void DistortionDSP::setTilt(float tilt)
-{
-	this->tilt = tilt;
-	this->tiltAbsolute = fabs(tilt);
-}
-
-void DistortionDSP::setDCOffset(float offset)
-{
-	this->dcOffset = offset;
 }
 
 void DistortionDSP::setGain(float gain)
@@ -62,21 +49,25 @@ float DistortionDSP::process(float sample)
 	sample = preGainProcessing(sample);
 
 	// Apply distortion effect
-	if (crunch <= 0.25f)
+	if (crunch <= 0.2f)
 	{
-		sample = interpolateValue(sample, softestDistortion(sample), crunch / 0.25f);
+		sample = interpolateValue(sample, softestDistortion(sample), crunch / 0.2f);
 	}
-	else if (crunch <= 0.5f)
+	else if (crunch <= 0.4f)
 	{
-		sample = interpolateValue(softestDistortion(sample), softDistortion(sample), (crunch - 0.25f) / 0.25f);
+		sample = interpolateValue(softestDistortion(sample), softDistortion(sample), (crunch - 0.2f) / 0.2f);
 	}
-	else if (crunch <= 0.75f)
+	else if (crunch <= 0.6f)
 	{
-		sample = interpolateValue(softDistortion(sample), hardDistortion(sample), (crunch - 0.5f) / 0.25f);
+		sample = interpolateValue(softDistortion(sample), mediumDistortion(sample), (crunch - 0.4f) / 0.2f);
+	}
+	else if (crunch <= 0.8f)
+	{
+		sample = interpolateValue(mediumDistortion(sample), hardDistortion(sample), (crunch - 0.6f) / 0.2f);
 	}
 	else
 	{
-		sample = hardDistortion(sample);
+		sample = interpolateValue(hardDistortion(sample), hardestDistortion(sample), (crunch - 0.8f) / 0.2f);
 	}
 
 	// Apply volume

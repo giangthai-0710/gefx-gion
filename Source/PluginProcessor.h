@@ -23,14 +23,12 @@ struct parametersStruct
 {
     float stage1Gain { 0 }, stage2Gain { 0 },
           stage1Crunch { 0 }, stage2Crunch { 0 }, 
-          stage1Tilt { 0 }, stage2Tilt { 0 },
-          stage1Offset { 0 }, stage2Offset { 0 },
           stage1Volume { 0 }, stage2Volume { 0 }, 
           stage1PreGainTone { 0 }, stage2PreGainTone { 0 }, 
           stage1PostGainTone { 0 }, stage2PostGainTone { 0 }, 
           boostMidGain { 0 };
 
-    bool stage1Bypass{ false }, stage2Bypass{ false }, antiAliasingBypass{ false };
+    bool stage1Bypass{ false }, stage2Bypass{ false };
 };
 
 parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts);
@@ -91,7 +89,7 @@ private:
     // Distortion
     DistortionDSP stage1Distortion, stage2Distortion;
 
-    juce::dsp::StateVariableTPTFilter<float> antiAliasingFilter;
+    juce::dsp::StateVariableTPTFilter<float> antiAliasingFilter, preGainHighPassFilter, postGainLowPassFilter;
     juce::dsp::ProcessSpec processSpec;
 
 

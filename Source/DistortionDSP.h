@@ -28,8 +28,6 @@ private:
     //==============================================================================
     // Distortion parameters
     float crunch;
-    float tilt;
-    float dcOffset;
     float gain;
     float volume;
     
@@ -38,18 +36,8 @@ private:
     //==============================================================================
     float preGainProcessing(float sample)
     {
-        sample =  5.0f * gain * (sample + dcOffset);
 
-        if (sample > 0.0f && tilt > 0.0f)
-        {
-            sample *= tiltAbsolute;
-        }
-        else if (sample < 0.0f && tilt < 0.0f)
-		{
-			sample *= tiltAbsolute;
-		}
-
-		return sample;
+        return 5.0f * gain * sample;
     }
 
     float softestDistortion(float sample)
@@ -95,6 +83,22 @@ private:
 			return -1.0f;
 		}
 	}
+
+    float hardestDistortion(float sample)
+    {
+        if (sample > 0.25f)
+        {
+            return 1.0f;
+        }
+        else if (sample <= -0.25f)
+        {
+			return -1.0f;
+		}
+        else
+        {
+			return 4.0f * sample;
+		}
+    }
 
     float interpolateValue(float valueA, float valueB, float ratio)
 	{
