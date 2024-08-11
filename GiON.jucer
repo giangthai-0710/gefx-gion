@@ -6,16 +6,31 @@
               pluginVST3Category="Distortion,Fx" pluginFormats="buildStandalone,buildVST3">
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
-      <FILE id="x73Tl7" name="DistortionDSP.cpp" compile="1" resource="0"
-            file="Source/DistortionDSP.cpp"/>
-      <FILE id="tka25n" name="DistortionDSP.h" compile="0" resource="0" file="Source/DistortionDSP.h"/>
-      <FILE id="ksmbaU" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="D7ayaJ" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="bwxBMw" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="EugTAG" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
+        <FILE id="r8tD77" name="Knob.png" compile="0" resource="1" file="Source/Asset/Knob.png"/>
+        <FILE id="zPEFsv" name="Knob_small.png" compile="0" resource="1" file="Source/Asset/Knob_small.png"/>
+      </GROUP>
+      <GROUP id="{A1A7B4F5-99A3-3B37-5E0D-5F12FB9489D8}" name="Processor">
+        <FILE id="zSUhDP" name="DistortionDSP.cpp" compile="1" resource="0"
+              file="Source/Processor/DistortionDSP.cpp"/>
+        <FILE id="Dg7WAj" name="DistortionDSP.h" compile="0" resource="0" file="Source/Processor/DistortionDSP.h"/>
+        <FILE id="SVs2bK" name="PluginEditor.cpp" compile="1" resource="0"
+              file="Source/Processor/PluginEditor.cpp"/>
+        <FILE id="fFwvjr" name="PluginEditor.h" compile="0" resource="0" file="Source/Processor/PluginEditor.h"/>
+        <FILE id="ebP1tF" name="PluginProcessor.cpp" compile="1" resource="0"
+              file="Source/Processor/PluginProcessor.cpp"/>
+        <FILE id="MPNQ22" name="PluginProcessor.h" compile="0" resource="0"
+              file="Source/Processor/PluginProcessor.h"/>
+      </GROUP>
+      <GROUP id="{91498994-D6B1-8279-5B35-787ED43F801A}" name="GUI">
+        <FILE id="ymT7zi" name="CustomSlider.cpp" compile="1" resource="0"
+              file="Source/GUI/CustomSlider.cpp"/>
+        <FILE id="hkH3au" name="CustomSlider.h" compile="0" resource="0" file="Source/GUI/CustomSlider.h"/>
+        <FILE id="x7lFIe" name="SliderLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/SliderLookAndFeel.cpp"/>
+        <FILE id="J3uRUF" name="SliderLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/SliderLookAndFeel.h"/>
+      </GROUP>
     </GROUP>
   </MAINGROUP>
   <MODULES>

@@ -14,38 +14,45 @@
 //==============================================================================
 SliderLookAndFeel::SliderLookAndFeel()
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
-
+    knobImage = juce::ImageCache::getFromMemory (BinaryData::Knob_small_png, BinaryData::Knob_small_pngSize);
 }
 
-SliderLookAndFeel::~SliderLookAndFeel()
+void SliderLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider)
 {
+    if (knobImage.isValid())
+    {
+        const double fractRotation = (slider.getValue() - slider.getMinimum()) / (slider.getMaximum() - slider.getMinimum());
+
+        const int nFrames = 128;
+        const int frameId = (int)ceil(fractRotation * ((double)nFrames - 1));
+        const float radius = juce::jmin(width / 2, height / 2) - 4.0f;
+        const float centerX = x + width * 0.5f;
+        const float centerY = y + height * 0.5f;
+        const float rx = centerX - radius;
+        const float ry = centerY - radius;
+
+        int imgWidth = knobImage.getWidth() / nFrames;
+        int imgHeight = knobImage.getHeight();
+
+        g.drawImage(knobImage, 0, 0, imgWidth, imgHeight, frameId * imgWidth, 0, imgWidth, imgHeight);
+    }
+    else
+    {
+        static const float textPpercent = 0.35f;
+        juce::Rectangle<float> text_bounds(1.0f + width * (1.0f - textPpercent) / 2.0f, 0.5f * height, width * textPpercent, 0.5f * height);
+
+        g.setColour(juce::Colours::white);
+
+        g.drawFittedText(juce::String("No Image"), text_bounds.getSmallestIntegerContainer(), juce::Justification::horizontallyCentred | juce::Justification::centred, 1);
+
+    }
 }
 
-void SliderLookAndFeel::paint (juce::Graphics& g)
+void SliderLookAndFeel::drawLabel(juce::Graphics& g, juce::Label& label)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (juce::Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("SliderLookAndFeel", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
-}
-
-void SliderLookAndFeel::resized()
-{
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
 
 }
+
+
+
+

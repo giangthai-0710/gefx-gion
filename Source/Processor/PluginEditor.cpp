@@ -16,6 +16,8 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
+
+    addAndMakeVisible(testSlider);
 }
 
 GiONAudioProcessorEditor::~GiONAudioProcessorEditor()
@@ -35,6 +37,7 @@ void GiONAudioProcessorEditor::paint (juce::Graphics& g)
 
 void GiONAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    testSlider.setBounds(0, 0, 128, 150 + 20);
+    testSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+
 }

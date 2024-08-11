@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    SliderLookAndFeel.h
-    Created: 11 Aug 2024 11:00:41pm
-    Author:  giang
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include <JuceHeader.h>
@@ -15,15 +5,17 @@
 //==============================================================================
 /*
 */
-class SliderLookAndFeel  : public juce::Component
+class SliderLookAndFeel  : public juce::LookAndFeel_V4
 {
 public:
     SliderLookAndFeel();
-    ~SliderLookAndFeel() override;
+    
+    void drawRotarySlider (juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
+                           float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) override;
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
+    void drawLabel (juce::Graphics& g, juce::Label& label) override;
 
 private:
+    juce::Image knobImage;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderLookAndFeel)
 };

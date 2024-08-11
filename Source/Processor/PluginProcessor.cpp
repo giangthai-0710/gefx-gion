@@ -117,7 +117,24 @@ void GiONAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     postGainLowPassFilter.prepare(processSpec);
     postGainLowPassFilter.reset();
 
+    preStageLeftFilter.prepare(processSpec);
+    preStageRightFilter.prepare(processSpec);
+    preStageLeftFilter.reset();
+    preStageRightFilter.reset();
 
+    postStage1LeftFilter.prepare(processSpec);
+    postStage1RightFilter.prepare(processSpec);
+    postStage1LeftFilter.reset();
+    postStage1RightFilter.reset();
+
+    postStage2LeftFilter.prepare(processSpec);
+    postStage2RightFilter.prepare(processSpec);
+    postStage2LeftFilter.reset();
+    postStage2RightFilter.reset();
+
+    midBoostLeftFilter.prepare(processSpec);
+    midBoostRightFilter.prepare(processSpec);
+    midBoostLeftFilter.reset();
 }
 
 void GiONAudioProcessor::releaseResources()
@@ -185,41 +202,46 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     preStageRightFilter.process(rightContext);
 
     // Stage 1 distortion
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    if (!parameters.stage1Bypass)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-		{
-            if (!parameters.stage1Bypass)
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            auto* channelData = buffer.getWritePointer(channel);
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
             {
                 channelData[sample] = stage1Distortion.process(channelData[sample]);
             }
-		}
+        }
+
+        // Post stage 1 filters
+        postStage1LeftFilter.process(leftContext);
+        postStage1RightFilter.process(rightContext);
+
     }
-
-    // Post stage 1 filters
-    postStage1LeftFilter.process(leftContext);
-    postStage1RightFilter.process(rightContext);
-
+    
     // Stage 2 distortion
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    if (!parameters.stage2Bypass)
     {
-        auto* channelData = buffer.getWritePointer(channel);
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        if (!parameters.stage1Bypass)
         {
-            if (!parameters.stage2Bypass)
+            buffer.applyGain(0.5f);
+        }
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            auto* channelData = buffer.getWritePointer(channel);
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
             {
                 channelData[sample] = stage2Distortion.process(channelData[sample]);
             }
         }
+
+        // Post stage 2 filters
+        postStage2LeftFilter.process(leftContext);
+        postStage2RightFilter.process(rightContext);
     }
 
     // Post gain low pass filter to avoid aliasing
     postGainLowPassFilter.process(context);
-
-    // Post stage 2 filters
-    postStage2LeftFilter.process(leftContext);
-    postStage2RightFilter.process(rightContext);
 
     // Mid boost filter
     midBoostLeftFilter.process(leftContext);
@@ -234,7 +256,7 @@ bool GiONAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* GiONAudioProcessor::createEditor()
 {
-    return new juce::GenericAudioProcessorEditor (*this);
+    return new GiONAudioProcessorEditor (*this);
 }
 
 //==============================================================================

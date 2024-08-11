@@ -15,6 +15,7 @@ public:
     void setCrunch(float crunch);
     void setGain(float gain);
     void setVolume(float volume);
+    void setDistortionStage(int stage);
 
     float getCrunch();
     float getGain();
@@ -32,7 +33,6 @@ private:
     float volume;
     
     // Helper variables
-    float tiltAbsolute;
     float pi = juce::MathConstants<float>::pi;
 
     //==============================================================================
@@ -62,52 +62,6 @@ private:
 	{      
         return std::erf(sample * 1.414f);
 	}
-
-    // Hard clipping distortion
-    float hardDistortion(float sample)
-	{
-		if(sample > 0.66f)
-		{
-			return 1.0f;
-		}
-		else if(sample <= 0.66f && sample > 0.33f)
-		{
-			return -3.0f * sample * sample + 4.0f * sample - 1.0f / 3.0f;
-		}
-		else if (sample < 0.33f && sample >= 0.0f)
-		{
-			return 2.0f * sample;
-		}
-        else if (sample < 0.0f && sample >= -0.33f)
-		{
-			return 2.0f * sample;
-		}
-		else if (sample < -0.33f && sample >= -0.66f)
-		{
-			return 3.0f * sample * sample + 4.0f * sample + 1.0f / 3.0f;
-		}
-		else if (sample < -0.66f)
-		{
-			return -1.0f;
-		}
-	}
-
-    // Hard clipping fuzz
-    float hardestDistortion(float sample)
-    {
-        if (sample > 0.2f)
-        {
-            return 1.0f;
-        }
-        else if (sample <= -0.2f)
-        {
-			return -1.0f;
-		}
-        else
-        {
-			return 5.0f * sample;
-		}
-    }
 
     //==============================================================================
     // Interpolates between two distortion values
