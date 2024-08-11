@@ -11,7 +11,9 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-#include "../GUI/CustomSlider.h"
+#include "../GUI/SmallKnob.h"
+#include "../GUI/MediumKnob.h"
+#include "../GUI/LargeKnob.h"
 
 //==============================================================================
 /**
@@ -31,7 +33,9 @@ private:
     // access the processor object that created it.
     GiONAudioProcessor& audioProcessor;
 
-    CustomSlider testSlider;
+    SmallKnob smallKnob;
+    MediumKnob mediumKnob;
+    LargeKnob largeKnob;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GiONAudioProcessorEditor)
 };

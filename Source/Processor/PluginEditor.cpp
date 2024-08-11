@@ -17,18 +17,21 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     // editor's size to whatever you need it to be.
     setSize (400, 300);
 
-    addAndMakeVisible(testSlider);
+    addAndMakeVisible(smallKnob);
+    addAndMakeVisible(mediumKnob);
+    addAndMakeVisible(largeKnob);
 }
 
 GiONAudioProcessorEditor::~GiONAudioProcessorEditor()
 {
+    
 }
 
 //==============================================================================
 void GiONAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll (juce::Colours::darkgrey);
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
@@ -37,7 +40,12 @@ void GiONAudioProcessorEditor::paint (juce::Graphics& g)
 
 void GiONAudioProcessorEditor::resized()
 {
-    testSlider.setBounds(0, 0, 128, 150 + 20);
-    testSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+    smallKnob.setBounds(0, 0, 48, 60);
+    smallKnob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
 
+    mediumKnob.setBounds(48, 0, 64, 80);
+    mediumKnob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+
+    largeKnob.setBounds(112, 0, 96, 120);
+    largeKnob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
 }

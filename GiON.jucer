@@ -7,8 +7,9 @@
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
       <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
-        <FILE id="r8tD77" name="Knob.png" compile="0" resource="1" file="Source/Asset/Knob.png"/>
-        <FILE id="zPEFsv" name="Knob_small.png" compile="0" resource="1" file="Source/Asset/Knob_small.png"/>
+        <FILE id="hRs1oU" name="Knob_large.png" compile="0" resource="1" file="Source/Asset/Knob_large.png"/>
+        <FILE id="PSILqf" name="Knob_medium.png" compile="0" resource="1" file="Source/Asset/Knob_medium.png"/>
+        <FILE id="AHn0sp" name="Knob_small.png" compile="0" resource="1" file="Source/Asset/Knob_small.png"/>
       </GROUP>
       <GROUP id="{A1A7B4F5-99A3-3B37-5E0D-5F12FB9489D8}" name="Processor">
         <FILE id="zSUhDP" name="DistortionDSP.cpp" compile="1" resource="0"
@@ -23,13 +24,24 @@
               file="Source/Processor/PluginProcessor.h"/>
       </GROUP>
       <GROUP id="{91498994-D6B1-8279-5B35-787ED43F801A}" name="GUI">
-        <FILE id="ymT7zi" name="CustomSlider.cpp" compile="1" resource="0"
-              file="Source/GUI/CustomSlider.cpp"/>
-        <FILE id="hkH3au" name="CustomSlider.h" compile="0" resource="0" file="Source/GUI/CustomSlider.h"/>
-        <FILE id="x7lFIe" name="SliderLookAndFeel.cpp" compile="1" resource="0"
-              file="Source/GUI/SliderLookAndFeel.cpp"/>
-        <FILE id="J3uRUF" name="SliderLookAndFeel.h" compile="0" resource="0"
-              file="Source/GUI/SliderLookAndFeel.h"/>
+        <FILE id="QROpL5" name="LargeKnob.cpp" compile="1" resource="0" file="Source/GUI/LargeKnob.cpp"/>
+        <FILE id="Guq3EU" name="LargeKnob.h" compile="0" resource="0" file="Source/GUI/LargeKnob.h"/>
+        <FILE id="jIDfcb" name="LargeKnobLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/LargeKnobLookAndFeel.cpp"/>
+        <FILE id="woqef1" name="LargeKnobLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/LargeKnobLookAndFeel.h"/>
+        <FILE id="wwi0mv" name="MediumKnob.cpp" compile="1" resource="0" file="Source/GUI/MediumKnob.cpp"/>
+        <FILE id="QTDuHr" name="MediumKnob.h" compile="0" resource="0" file="Source/GUI/MediumKnob.h"/>
+        <FILE id="Pl9SGu" name="MediumKnobLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/MediumKnobLookAndFeel.cpp"/>
+        <FILE id="CmTaRy" name="MediumKnobLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/MediumKnobLookAndFeel.h"/>
+        <FILE id="kXmbqY" name="SmallKnob.cpp" compile="1" resource="0" file="Source/GUI/SmallKnob.cpp"/>
+        <FILE id="VPAutt" name="SmallKnob.h" compile="0" resource="0" file="Source/GUI/SmallKnob.h"/>
+        <FILE id="gMaXLI" name="SmallKnobLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/SmallKnobLookAndFeel.cpp"/>
+        <FILE id="E3aezq" name="SmallKnobLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/SmallKnobLookAndFeel.h"/>
       </GROUP>
     </GROUP>
   </MAINGROUP>
