@@ -33,6 +33,8 @@ GiONAudioProcessor::GiONAudioProcessor()
     postGainLowPassFilter.setCutoffFrequency(8000.0f);
     postGainLowPassFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
     postGainLowPassFilter.setResonance(0.7071f);
+
+    distortionStage.setDistortionStage(1);
 }
 
 GiONAudioProcessor::~GiONAudioProcessor()
@@ -117,20 +119,15 @@ void GiONAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     postGainLowPassFilter.prepare(processSpec);
     postGainLowPassFilter.reset();
 
-    preStageLeftFilter.prepare(processSpec);
-    preStageRightFilter.prepare(processSpec);
-    preStageLeftFilter.reset();
-    preStageRightFilter.reset();
+    preLeftFilter.prepare(processSpec);
+    preRightFilter.prepare(processSpec);
+    preLeftFilter.reset();
+    preRightFilter.reset();
 
-    postStage1LeftFilter.prepare(processSpec);
-    postStage1RightFilter.prepare(processSpec);
-    postStage1LeftFilter.reset();
-    postStage1RightFilter.reset();
-
-    postStage2LeftFilter.prepare(processSpec);
-    postStage2RightFilter.prepare(processSpec);
-    postStage2LeftFilter.reset();
-    postStage2RightFilter.reset();
+    postLeftFilter.prepare(processSpec);
+    postRightFilter.prepare(processSpec);
+    postLeftFilter.reset();
+    postRightFilter.reset();
 
     midBoostLeftFilter.prepare(processSpec);
     midBoostRightFilter.prepare(processSpec);
@@ -177,75 +174,53 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, buffer.getNumSamples());
 
-    parametersStruct parameters = getParametersFromTree(apvts);
+    auto parameters = getParametersFromTree(apvts);
     updateParameters();
     updateFilters();
 
-    // Context for the audio block
     auto myBlock = juce::dsp::AudioBlock<float>(buffer);
-    auto context = juce::dsp::ProcessContextReplacing<float>(myBlock);
-
     auto leftBlock = myBlock.getSingleChannelBlock(0);
     auto rightBlock = myBlock.getSingleChannelBlock(1);
 
+    auto myContext = juce::dsp::ProcessContextReplacing<float>(myBlock);
     auto leftContext = juce::dsp::ProcessContextReplacing<float>(leftBlock);
     auto rightContext = juce::dsp::ProcessContextReplacing<float>(rightBlock);
 
-    // Anti-aliasing filter
-    antiAliasingFilter.process(context);
-    preGainHighPassFilter.process(context);
-
-    // Pre distortion filters
-    preStageLeftFilter.process(leftContext);
-    preStageRightFilter.process(rightContext);
-
-    // Stage 1 distortion
-    if (!parameters.stage1Bypass)
+    if (!parameters.distortionBypass)
     {
+        // Anti-aliasing filter
+		antiAliasingFilter.process(myContext);
+
+        // High-pass filter to remove low frequencies
+        preGainHighPassFilter.process(myContext);
+
+        // Pre-distortion tone shaping
+        preLeftFilter.process(leftContext);
+        preRightFilter.process(rightContext);
+
+        // Distortion stage
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
         {
-            auto* channelData = buffer.getWritePointer(channel);
+			auto* channelData = buffer.getWritePointer(channel);
             for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
             {
-                channelData[sample] = stage1Distortion.process(channelData[sample]);
-            }
-        }
+				channelData[sample] = distortionStage.process(channelData[sample]);
+			}
+		}
 
-        // Post stage 1 filters
-        postStage1LeftFilter.process(leftContext);
-        postStage1RightFilter.process(rightContext);
+        // Low-pass filter to remove noise
+        postGainLowPassFilter.process(myContext);
 
-    }
-    
-    // Stage 2 distortion
-    if (!parameters.stage2Bypass)
-    {
-        if (!parameters.stage1Bypass)
-        {
-            buffer.applyGain(0.5f);
-        }
-        for (int channel = 0; channel < totalNumInputChannels; ++channel)
-        {
-            auto* channelData = buffer.getWritePointer(channel);
-            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-            {
-                channelData[sample] = stage2Distortion.process(channelData[sample]);
-            }
-        }
+        // Post-distortion tone shaping
+        postLeftFilter.process(leftContext);
+        postRightFilter.process(rightContext);
 
-        // Post stage 2 filters
-        postStage2LeftFilter.process(leftContext);
-        postStage2RightFilter.process(rightContext);
-    }
-
-    // Post gain low pass filter to avoid aliasing
-    postGainLowPassFilter.process(context);
-
-    // Mid boost filter
-    midBoostLeftFilter.process(leftContext);
-    midBoostRightFilter.process(rightContext);
+        // Mid boost
+        midBoostLeftFilter.process(leftContext);
+        midBoostRightFilter.process(rightContext);
+	}
 }
 
 //==============================================================================
@@ -256,7 +231,7 @@ bool GiONAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* GiONAudioProcessor::createEditor()
 {
-    return new GiONAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -277,69 +252,49 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Gain",
-                                                           "Stage 1 Gain",
-                                                           juce::NormalisableRange<float>(-3.0f, 24.0f, 0.1f),
-                                                           0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Gain",
-                                                           "Stage 2 Gain",
-                                                           juce::NormalisableRange<float>(-3.0f, 24.0f, 0.1f),
+    layout.add(std::make_unique<juce::AudioParameterFloat>("gain",
+                                                           "Gain",
+                                                           juce::NormalisableRange<float>(-3.0f, 15.0f, 0.1f),
                                                            0.0f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Crunch", 
-                                                           "Stage 1 Crunch", 
+    layout.add(std::make_unique<juce::AudioParameterFloat>("crunch", 
+                                                           "Crunch", 
                                                            juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 
                                                            0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Crunch",
-														   "Stage 2 Crunch",
-														   juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-														   0.5f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("stage1Volume",
-                                                           "Stage 1 Volume",
-                                                           juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
-                                                           0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("stage2Volume",
-                                                           "Stage 2 Volume",
+    layout.add(std::make_unique<juce::AudioParameterFloat>("volume",
+                                                           "Volume",
                                                            juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
                                                            0.0f));
 
     // Filters
-    layout.add(std::make_unique<juce::AudioParameterFloat>("preStageBassGain", 
-                                                           "Pre Stage Bass Gain",
+    layout.add(std::make_unique<juce::AudioParameterFloat>("preBassGain", 
+                                                           "Pre Bass",
                                                            juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
                                                            0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("preStageTrebleGain",
-                                                           "Pre Stage Treble Gain",
+    layout.add(std::make_unique<juce::AudioParameterFloat>("preTrebleGain",
+                                                           "Pre Treble",
 														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
 														   0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage1BassGain",
-                                                           "Post Stage 1 Bass Gain", 
+    layout.add(std::make_unique<juce::AudioParameterFloat>("postBassGain",
+                                                           "Post Bass", 
 														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
 														   0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage1TrebleGain",
-                                                           "Post Stage 1 Treble Gain",
+    layout.add(std::make_unique<juce::AudioParameterFloat>("postTrebleGain",
+                                                           "Post Treble",
 														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
 														   0.0f)); 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage2BassGain",
-                                                           "Post Stage 2 Bass Gain",
-														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
-														   0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("postStage2TrebleGain",
-                                                           "Post Stage 2 Treble Gain",
-														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
-														   0.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("midBoostGain",
-                                                           "Mid Boost Gain",
+                                                           "Mid",
 														   juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 
 														   0.0f));
 
-    layout.add(std::make_unique<juce::AudioParameterBool>("stage1Bypass",
-                                                          "Stage 1 Bypass",
+    layout.add(std::make_unique<juce::AudioParameterBool>("distortionBypass",
+                                                          "Distortion Bypass",
 														   false));
 
-    layout.add(std::make_unique<juce::AudioParameterBool>("stage2Bypass",
-                                                          "Stage 2 Bypass",
+    layout.add(std::make_unique<juce::AudioParameterBool>("distortionStage",
+                                                          "Distortion Stage",
 														   false));
     return layout;
 }
@@ -348,23 +303,18 @@ parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts
 {
     parametersStruct parameters;
 
-    parameters.stage1Crunch = apvts.getRawParameterValue("stage1Crunch")->load();
-    parameters.stage2Crunch = apvts.getRawParameterValue("stage2Crunch")->load();
-    parameters.stage1Gain = apvts.getRawParameterValue("stage1Gain")->load();
-    parameters.stage2Gain = apvts.getRawParameterValue("stage2Gain")->load();
-    parameters.stage1Volume = apvts.getRawParameterValue("stage1Volume")->load();
-    parameters.stage2Volume = apvts.getRawParameterValue("stage2Volume")->load();
+    parameters.distortionGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("gain")->load());
+    parameters.distortionCrunch = apvts.getRawParameterValue("crunch")->load();
+    parameters.distortionVolume = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("volume")->load());
 
-    parameters.preStageBassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("preStageBassGain")->load());
-    parameters.preStageTrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("preStageTrebleGain")->load());
-    parameters.postStage1BassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage1BassGain")->load());
-    parameters.postStage1TrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage1TrebleGain")->load());
-    parameters.postStage2BassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage2BassGain")->load());
-    parameters.postStage2TrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postStage2TrebleGain")->load());
+    parameters.preBassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("preBassGain")->load());
+    parameters.preTrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("preTrebleGain")->load());
+    parameters.postBassGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postBassGain")->load());
+    parameters.postTrebleGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("postTrebleGain")->load());
     parameters.midBoostGain = juce::Decibels::decibelsToGain(apvts.getRawParameterValue("midBoostGain")->load());
 
-    parameters.stage1Bypass = apvts.getRawParameterValue("stage1Bypass")->load();
-    parameters.stage2Bypass = apvts.getRawParameterValue("stage2Bypass")->load();
+    parameters.distortionBypass = apvts.getRawParameterValue("distortionBypass")->load();
+    parameters.distortionStage = apvts.getRawParameterValue("distortionStage")->load();
 
     return parameters;
 }
@@ -373,61 +323,52 @@ void GiONAudioProcessor::updateParameters()
 {
     auto parameters = getParametersFromTree(apvts);
 
-    stage1Distortion.setCrunch(parameters.stage1Crunch);
-    stage2Distortion.setCrunch(parameters.stage2Crunch);
-    stage1Distortion.setGain(juce::Decibels::decibelsToGain(parameters.stage1Gain));
-    stage2Distortion.setGain(juce::Decibels::decibelsToGain(parameters.stage2Gain));
-    stage1Distortion.setVolume(juce::Decibels::decibelsToGain(parameters.stage1Volume));
-    stage2Distortion.setVolume(juce::Decibels::decibelsToGain(parameters.stage2Volume));
+    distortionStage.setGain(parameters.distortionGain);
+    distortionStage.setCrunch(parameters.distortionCrunch);
+    distortionStage.setVolume(parameters.distortionVolume);
 
-    
+    if (parameters.distortionStage == false)
+    {
+        distortionStage.setDistortionStage(1);
+	}
+	else
+	{
+		distortionStage.setDistortionStage(2);
+    }
 }
 
 void GiONAudioProcessor::updateFilters()
 {
     auto parameters = getParametersFromTree(apvts);
 
-	preStageBassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
-                                                                                   preStageBassFrequency, 
-                                                                                   preStageBassQ, 
-                                                                                   parameters.preStageBassGain);
-    updateCoefficients(preStageLeftFilter.get<FilterType::bassFilter>().coefficients, preStageBassCoefficients);
-    updateCoefficients(preStageRightFilter.get<FilterType::bassFilter>().coefficients, preStageBassCoefficients); 
+	preBassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
+                                                                                   preBassFrequency, 
+                                                                                   preBassQ, 
+                                                                                   parameters.preBassGain);
+    updateCoefficients(preLeftFilter.get<FilterType::bassFilter>().coefficients, preBassCoefficients);
+    updateCoefficients(preRightFilter.get<FilterType::bassFilter>().coefficients, preBassCoefficients); 
     
-    preStageTrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
-                                                                                     preStageTrebleFrequency, 
-                                                                                     preStageTrebleQ, 
-                                                                                     parameters.preStageTrebleGain);
-    updateCoefficients(preStageLeftFilter.get<FilterType::trebleFilter>().coefficients, preStageTrebleCoefficients); 
-    updateCoefficients(preStageRightFilter.get<FilterType::trebleFilter>().coefficients, preStageTrebleCoefficients); 
+    preTrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                     preTrebleFrequency, 
+                                                                                     preTrebleQ, 
+                                                                                     parameters.preTrebleGain);
+    updateCoefficients(preLeftFilter.get<FilterType::trebleFilter>().coefficients, preTrebleCoefficients); 
+    updateCoefficients(preRightFilter.get<FilterType::trebleFilter>().coefficients, preTrebleCoefficients); 
 
-    postStage1BassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
-                                                                                     postStage1BassFrequency, 
-                                                                                     postStage1BassQ, 
-                                                                                     parameters.postStage1BassGain);
-    updateCoefficients(postStage1LeftFilter.get<FilterType::bassFilter>().coefficients, postStage1BassCoefficients);
-    updateCoefficients(postStage1RightFilter.get<FilterType::bassFilter>().coefficients, postStage1BassCoefficients); 
+    postBassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                     postBassFrequency, 
+                                                                                     postBassQ, 
+                                                                                     parameters.postBassGain);
+    updateCoefficients(postLeftFilter.get<FilterType::bassFilter>().coefficients, postBassCoefficients);
+    updateCoefficients(postRightFilter.get<FilterType::bassFilter>().coefficients, postBassCoefficients); 
 
-    postStage1TrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
-                                                                                       postStage1TrebleFrequency, 
-                                                                                       postStage1TrebleQ, 
-                                                                                       parameters.postStage1TrebleGain);
-    updateCoefficients(postStage1LeftFilter.get<FilterType::trebleFilter>().coefficients, postStage1TrebleCoefficients);
-    updateCoefficients(postStage1RightFilter.get<FilterType::trebleFilter>().coefficients, postStage1TrebleCoefficients);
+    postTrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
+                                                                                       postTrebleFrequency, 
+                                                                                       postTrebleQ, 
+                                                                                       parameters.postTrebleGain);
+    updateCoefficients(postLeftFilter.get<FilterType::trebleFilter>().coefficients, postTrebleCoefficients);
+    updateCoefficients(postRightFilter.get<FilterType::trebleFilter>().coefficients, postTrebleCoefficients);
 
-    postStage2BassCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate, 
-                                                                                     postStage2BassFrequency, 
-                                                                                     postStage2BassQ,
-                                                                                     parameters.postStage2BassGain);
-    updateCoefficients(postStage2LeftFilter.get<FilterType::bassFilter>().coefficients, postStage2BassCoefficients);
-    updateCoefficients(postStage2RightFilter.get<FilterType::bassFilter>().coefficients, postStage2BassCoefficients);
-
-    postStage2TrebleCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
-                                                                                       postStage2TrebleFrequency,
-                                                                                       postStage2TrebleQ, 
-                                                                                       parameters.postStage2TrebleGain);
-    updateCoefficients(postStage2LeftFilter.get<FilterType::trebleFilter>().coefficients, postStage2TrebleCoefficients);
-    updateCoefficients(postStage2RightFilter.get<FilterType::trebleFilter>().coefficients, postStage2TrebleCoefficients);
 
     midBoostCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(processSpec.sampleRate,
                                                                                midBoostFrequency,

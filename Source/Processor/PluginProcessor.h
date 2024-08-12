@@ -19,15 +19,12 @@ using Coefficients = Filter::CoefficientsPtr;
 //==============================================================================
 struct parametersStruct
 {
-    float stage1Gain { 0 }, stage2Gain { 0 },
-          stage1Crunch { 0 }, stage2Crunch { 0 }, 
-          stage1Volume { 0 }, stage2Volume { 0 }, 
-          preStageBassGain{ 0 }, preStageTrebleGain { 0 },
-          postStage1BassGain{ 0 }, postStage1TrebleGain{ 0 },
-          postStage2BassGain{ 0 }, postStage2TrebleGain{ 0 },
+    float distortionGain{ 0 }, distortionCrunch{ 0 }, distortionVolume{ 0 },
+          preBassGain{ 0 }, preTrebleGain { 0 },
+          postBassGain{ 0 }, postTrebleGain{ 0 },
           midBoostGain { 0 };
 
-    bool stage1Bypass{ false }, stage2Bypass{ false };
+    bool distortionBypass{ false }, distortionStage{ false };
 };
 
 parametersStruct getParametersFromTree(juce::AudioProcessorValueTreeState& apvts);
@@ -83,15 +80,13 @@ private:
     // Filters
     using FilterChain = juce::dsp::ProcessorChain<Filter, Filter>;
 
-    FilterChain preStageLeftFilter, preStageRightFilter,
-				postStage1LeftFilter, postStage1RightFilter,
-				postStage2LeftFilter, postStage2RightFilter;
+    FilterChain preLeftFilter, preRightFilter,
+                postLeftFilter, postRightFilter;
 
     Filter midBoostLeftFilter, midBoostRightFilter;
 
-    Coefficients preStageBassCoefficients, preStageTrebleCoefficients,
-				 postStage1BassCoefficients, postStage1TrebleCoefficients,
-				 postStage2BassCoefficients, postStage2TrebleCoefficients,
+    Coefficients preBassCoefficients, preTrebleCoefficients,
+				 postBassCoefficients, postTrebleCoefficients,
 				 midBoostCoefficients;
 
     enum FilterType
@@ -100,14 +95,12 @@ private:
         trebleFilter
     };
 
-    float preStageBassFrequency = 120.0f, preStageTrebleFrequency = 3000.0f,
-        postStage1BassFrequency = 120.0f, postStage1TrebleFrequency = 3000.0f,
-        postStage2BassFrequency = 120.0f, postStage2TrebleFrequency = 3000.0f,
-        midBoostFrequency = 900.0f;
+    float preBassFrequency = 120.0f, preTrebleFrequency = 3000.0f,
+          postBassFrequency = 120.0f, postTrebleFrequency = 3000.0f,
+          midBoostFrequency = 900.0f;
 
-    float preStageBassQ = 0.707f, preStageTrebleQ = 0.707f,
-		  postStage1BassQ = 0.707f, postStage1TrebleQ = 0.707f,
-		  postStage2BassQ = 0.707f, postStage2TrebleQ = 0.707f,
+    float preBassQ = 0.707f, preTrebleQ = 0.707f,
+		  postBassQ = 0.707f, postTrebleQ = 0.707f,
 		  midBoostQ = 0.707f;
 
     void updateCoefficients(Coefficients& old, Coefficients& replacement)
@@ -119,7 +112,7 @@ private:
 
     //==============================================================================
     // Distortion
-    DistortionDSP stage1Distortion, stage2Distortion;
+    DistortionDSP distortionStage;
 
     juce::dsp::StateVariableTPTFilter<float> antiAliasingFilter, 
                                              preGainHighPassFilter, 

@@ -31,6 +31,8 @@ private:
     float crunch;
     float gain;
     float volume;
+
+    int distortionStage;
     
     // Helper variables
     float pi = juce::MathConstants<float>::pi;
@@ -62,6 +64,48 @@ private:
 	{      
         return std::erf(sample * 1.414f);
 	}
+
+    // Hard clipping overdrive
+    float hardDistortion(float sample)
+    {
+        if (sample >= 0.66f)
+        {
+            return 1.0f;
+        }
+        else if (sample <= 0.66f && sample >= 0.33f)
+        {
+            return (3.0f - std::pow(2.0f - 3.0f * sample, 2)) / 3.0f;
+        }
+        else if (sample <= 0.33f && sample >= -0.33f)
+        {
+            return 2.0f * sample;
+		}
+        else if (sample <= -0.33f && sample >= -0.66f)
+        {
+			return (-3.0f + std::pow(2.0f + 3.0f * sample, 2)) / 3.0f;
+		}
+        else
+        {
+			return -1.0f;
+		}
+    }
+
+    // Hardest clipping overdrive
+    float hardestDistortion(float sample)
+    {
+        if (sample >= 0.2f)
+        {
+            return 1.0f;
+        }
+        else if (sample <= 0.2f && sample >= -0.2f)
+        {
+            return 5.0f * sample;
+        }
+        else
+        {
+			return -1.0f;
+		}
+    }
 
     //==============================================================================
     // Interpolates between two distortion values

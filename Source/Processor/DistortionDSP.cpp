@@ -5,6 +5,7 @@ DistortionDSP::DistortionDSP()
 	this->crunch = 0.0f;
 	this->gain = 0.0f;
 	this->volume = 0.0f;
+	this->distortionStage = 1;
 }
 
 DistortionDSP::~DistortionDSP()
@@ -24,6 +25,11 @@ void DistortionDSP::setGain(float gain)
 void DistortionDSP::setVolume(float volume)
 {
 	this->volume = volume;
+}
+
+void DistortionDSP::setDistortionStage(int stage)
+{
+	this->distortionStage = stage;
 }
 
 float DistortionDSP::getCrunch()
@@ -46,13 +52,27 @@ float DistortionDSP::process(float sample)
 	// Apply pre distortion gain
 	sample = preGainProcessing(sample);
 
-	if (crunch <= 0.5f)
+	if (distortionStage == 1)
 	{
-		sample = interpolateValue(softestDistortion(sample), softDistortion(sample), crunch / 0.5f);
+		if (crunch <= 0.5f)
+		{
+			sample = interpolateValue(softestDistortion(sample), softDistortion(sample), crunch / 0.5f);
+		}
+		else
+		{
+			sample = interpolateValue(softDistortion(sample), mediumDistortion(sample), (crunch - 0.5f) / 0.5f);
+		}
 	}
-	else
+	else if (distortionStage == 2)
 	{
-		sample = interpolateValue(softDistortion(sample), mediumDistortion(sample), (crunch - 0.5f) / 0.5f);
+		if (crunch <= 0.5f)
+		{
+			sample = interpolateValue(mediumDistortion(sample), hardDistortion(sample), crunch / 0.5f);
+		}
+		else
+		{
+			sample = interpolateValue(hardDistortion(sample), hardestDistortion(sample), (crunch - 0.5f) / 0.5f);
+		}
 	}
 
 	// Apply volume
