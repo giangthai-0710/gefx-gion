@@ -7,6 +7,7 @@
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
       <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
+        <FILE id="GGmOfK" name="Background.png" compile="0" resource="1" file="Source/Asset/Background.png"/>
         <FILE id="shPIZL" name="Switch_pressed.png" compile="0" resource="1"
               file="Source/Asset/Switch_pressed.png"/>
         <FILE id="SyAPnh" name="Switch.png" compile="0" resource="1" file="Source/Asset/Switch.png"/>

@@ -188,7 +188,7 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     buffer.applyGain(parameters.distortionGain);
     distortionLevelLeft = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     distortionLevelRight = buffer.getRMSLevel(1, 0, buffer.getNumSamples());
-    distortionLevel = (distortionLevelLeft + distortionLevelRight) / 2 * 100;
+    distortionLevel = (distortionLevelLeft + distortionLevelRight);
     buffer.applyGain(1.0f / parameters.distortionGain);
 
     if (!parameters.distortionBypass)
@@ -395,7 +395,15 @@ void GiONAudioProcessor::updateFilters()
 
 float GiONAudioProcessor::getRMSLevel()
 {
-    return distortionLevel;
+    parametersStruct parameters = getParametersFromTree(apvts);
+    if (parameters.distortionStage == 0)
+    {
+        return distortionLevel * (1 + parameters.distortionCrunch);
+    }
+    else
+    {
+		return distortionLevel * (1 + parameters.distortionCrunch) * 1.5f;
+	}
 }
 
 //==============================================================================

@@ -18,6 +18,8 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     // Set the window size
     setSize (480, 270);
 
+    background = juce::ImageCache::getFromMemory(BinaryData::Background_png, BinaryData::Background_pngSize);
+
     getLookAndFeel().getDefaultLookAndFeel().setDefaultSansSerifTypefaceName("Arial");
 
     // Gain knob
@@ -101,6 +103,8 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
         bypassSwitch.isJustClicked();
 	};
 
+    bypassLabel.setText("BYPASS", juce::dontSendNotification);
+
 	// Change stage switch
     changeStageSwitch.setToggleState(true, juce::dontSendNotification);
 	changeStageSwitch.onClick = [this]
@@ -108,6 +112,8 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
 		stageLED.setDistortionStage(!changeStageSwitch.getToggleState() ? 1 : 2);
         changeStageSwitch.isJustClicked();
 	};
+
+    changeStageLabel.setText("STAGE", juce::dontSendNotification);
 
     // LED
     stageLED.setIsOn(bypassSwitch.getToggleState());
@@ -160,7 +166,10 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     addAndMakeVisible(postTrebleLabel);
 
     addAndMakeVisible(bypassSwitch);
+    addAndMakeVisible(bypassLabel);
+
     addAndMakeVisible(changeStageSwitch);
+    addAndMakeVisible(changeStageLabel);
 
     addAndMakeVisible(stageLED);
     addAndMakeVisible(gainLED);
@@ -176,15 +185,13 @@ GiONAudioProcessorEditor::~GiONAudioProcessorEditor()
 void GiONAudioProcessorEditor::timerCallback()
 {
     float percentage = (audioProcessor.getRMSLevel() >= 1) ? 1 : audioProcessor.getRMSLevel();
-    DBG(percentage);
     gainLED.setGainPercentage(percentage);
 }
 
 //==============================================================================
 void GiONAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (juce::Colour(0xff303030));
+    g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0, background.getWidth(), background.getHeight());
 }
 
 void GiONAudioProcessorEditor::resized()
@@ -236,8 +243,8 @@ void GiONAudioProcessorEditor::resized()
     auto switchWidth = 48;
     auto switchHeight = 48;
 
-    auto ledWidth = 24;
-    auto ledHeight = 24;
+    auto ledWidth = 64;
+    auto ledHeight = 64;
 
     // Pre calculated values to make the code more readable
     auto largeKnobDeltaX = largeKnobWidth / 2; // This is the distance from the center of the knob to the left edge, used to center the knob
@@ -258,7 +265,7 @@ void GiONAudioProcessorEditor::resized()
     auto switchDeltaY = switchHeight / 2;
 
     auto ledDeltaX = ledWidth / 2;
-    auto ledDeltaY = ledHeight / 2;
+    auto ledDeltaY = ledHeight / 2 - 10; // We subtract 10 since the LED is just 10 pixels, the LED png is large due to the glow effect
 
     // Knobs and labels positions
     gainKnob.setBounds(firstVerticalQuarterLine, secondHorizontalSixthLine, smallKnobWidth, smallKnobHeight);
@@ -288,10 +295,13 @@ void GiONAudioProcessorEditor::resized()
     postTrebleKnob.setBounds(fifthVerticalEighthLine - mediumKnobDeltaX, topLine, mediumKnobWidth, mediumKnobHeight);
     postTrebleLabel.setBounds(fifthVerticalEighthLine - labelDeltaX, firstHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    bypassSwitch.setBounds(seventhVerticalEighthLine - switchDeltaX, lastHorizontalSixthLine - switchDeltaY + verticalMargin, switchWidth, switchHeight);
-    changeStageSwitch.setBounds(firstVerticalEighthLine - switchDeltaX, lastHorizontalSixthLine - switchDeltaY + verticalMargin, switchWidth, switchHeight);
+    bypassSwitch.setBounds(seventhVerticalEighthLine - switchDeltaX, lastHorizontalSixthLine - switchDeltaY, switchWidth, switchHeight);
+    bypassLabel.setBounds(seventhVerticalEighthLine - labelDeltaX, lastHorizontalSixthLine + switchDeltaY, labelWidth, labelHeight);
 
-    stageLED.setBounds(firstVerticalEighthLine - ledDeltaX, fourthHorizontalSixthLine, ledWidth, ledHeight);
-    gainLED.setBounds(seventhVerticalEighthLine - ledDeltaX, fourthHorizontalSixthLine, ledWidth, ledHeight);
+    changeStageSwitch.setBounds(firstVerticalEighthLine - switchDeltaX, lastHorizontalSixthLine - switchDeltaY, switchWidth, switchHeight);
+    changeStageLabel.setBounds(firstVerticalEighthLine - labelDeltaX, lastHorizontalSixthLine + switchDeltaY, labelWidth, labelHeight);
+
+    gainLED.setBounds(seventhVerticalEighthLine - ledDeltaX, fourthHorizontalSixthLine - ledDeltaY, ledWidth, ledHeight);
+    stageLED.setBounds(firstVerticalEighthLine - ledDeltaX, fourthHorizontalSixthLine - ledDeltaY, ledWidth, ledHeight);
 }
 

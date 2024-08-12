@@ -17,10 +17,9 @@ void LabelLookAndFeel::drawLabel(juce::Graphics& g, juce::Label& label)
 
 	if (!label.isBeingEdited())
 	{
-		auto alpha = label.isEnabled() ? 1.0f : 0.5f;
-		const auto font = juce::Font("Arial", fontSize, juce::Font::bold);
+		const auto font = juce::Font("Now", fontSize, juce::Font::bold);
 
-		g.setColour(label.findColour(juce::Label::textColourId).withMultipliedAlpha(alpha));
+		g.setColour(juce::Colour(0xffb1b1b1));
 		g.setFont(font);
 
 		auto textArea = label.getBorderSize().subtractedFrom(label.getLocalBounds());
@@ -48,7 +47,7 @@ void LabelLookAndFeel::setLabelSize(juce::String size)
 	}
 	else if (size == "small")
 	{
-		fontSize = 10;
+		fontSize = 7;
 	}
 	else
 	{

@@ -35,6 +35,8 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
+    juce::Image background;
+
     GiONAudioProcessor& audioProcessor;
 
     Knob gainKnob, crunchKnob, volumeKnob, 
@@ -43,7 +45,8 @@ private:
 
     Label gainLabel, crunchLabel, volumeLabel, 
           preBassLabel, preMidLabel, preTrebleLabel, 
-          postBassLabel, postMidLabel, postTrebleLabel;
+          postBassLabel, postMidLabel, postTrebleLabel,
+          bypassLabel, changeStageLabel;
 
     Switch bypassSwitch, changeStageSwitch;
 
