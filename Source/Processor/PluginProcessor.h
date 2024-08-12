@@ -20,9 +20,8 @@ using Coefficients = Filter::CoefficientsPtr;
 struct parametersStruct
 {
     float distortionGain{ 0 }, distortionCrunch{ 0 }, distortionVolume{ 0 },
-          preBassGain{ 0 }, preTrebleGain { 0 },
-          postBassGain{ 0 }, postTrebleGain{ 0 },
-          midBoostGain { 0 };
+        preBassGain{ 0 }, preMidGain{ 0 }, preTrebleGain{ 0 },
+        postBassGain{ 0 }, postMidGain{ 0 }, postTrebleGain{ 0 };
 
     bool distortionBypass{ false }, distortionStage{ false };
 };
@@ -75,50 +74,47 @@ public:
     void updateParameters();
     void updateFilters();
 
+    float getRMSLevel();
+
 private:
     //==============================================================================
     // Filters
-    using FilterChain = juce::dsp::ProcessorChain<Filter, Filter>;
+    using FilterChain = juce::dsp::ProcessorChain<Filter, Filter ,Filter>;
 
     FilterChain preLeftFilter, preRightFilter,
                 postLeftFilter, postRightFilter;
 
-    Filter midBoostLeftFilter, midBoostRightFilter;
-
-    Coefficients preBassCoefficients, preTrebleCoefficients,
-				 postBassCoefficients, postTrebleCoefficients,
-				 midBoostCoefficients;
+    Coefficients preBassCoefficients, preMidCoefficients, preTrebleCoefficients,
+                 postBassCoefficients, postMidCoefficients, postTrebleCoefficients;
 
     enum FilterType
     {
         bassFilter,
+        midFilter,
         trebleFilter
     };
 
-    float preBassFrequency = 120.0f, preTrebleFrequency = 3000.0f,
-          postBassFrequency = 120.0f, postTrebleFrequency = 3000.0f,
-          midBoostFrequency = 900.0f;
+    float bassFrequency = 120.0f, midFrequency = 1000.0f, trebleFrequency = 8000.0f;
 
-    float preBassQ = 0.707f, preTrebleQ = 0.707f,
-		  postBassQ = 0.707f, postTrebleQ = 0.707f,
-		  midBoostQ = 0.707f;
+    float bassQ = 0.707f, midQ = 0.707f, trebleQ = 0.707f;
 
     void updateCoefficients(Coefficients& old, Coefficients& replacement)
     {
         *old = *replacement;
     }
 
-
-
     //==============================================================================
     // Distortion
     DistortionDSP distortionStage;
+
+    float distortionLevelLeft, distortionLevelRight, distortionLevel;
 
     juce::dsp::StateVariableTPTFilter<float> antiAliasingFilter, 
                                              preGainHighPassFilter, 
                                              postGainLowPassFilter;
     juce::dsp::ProcessSpec processSpec;
 
+ 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GiONAudioProcessor)
 };

@@ -8,6 +8,24 @@
 
 namespace BinaryData
 {
+    extern const char*   Switch_pressed_png;
+    const int            Switch_pressed_pngSize = 3395;
+
+    extern const char*   Switch_png;
+    const int            Switch_pngSize = 3493;
+
+    extern const char*   LED_on_png;
+    const int            LED_on_pngSize = 1306;
+
+    extern const char*   LED_on_2_png;
+    const int            LED_on_2_pngSize = 1268;
+
+    extern const char*   LED_off_png;
+    const int            LED_off_pngSize = 605;
+
+    extern const char*   LED_changeable_png;
+    const int            LED_changeable_pngSize = 14045;
+
     extern const char*   Knob_large_png;
     const int            Knob_large_pngSize = 132511;
 
@@ -18,7 +36,7 @@ namespace BinaryData
     const int            Knob_small_pngSize = 48940;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 3;
+    const int namedResourceListSize = 9;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

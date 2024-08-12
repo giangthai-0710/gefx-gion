@@ -7,6 +7,14 @@
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
       <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
+        <FILE id="shPIZL" name="Switch_pressed.png" compile="0" resource="1"
+              file="Source/Asset/Switch_pressed.png"/>
+        <FILE id="SyAPnh" name="Switch.png" compile="0" resource="1" file="Source/Asset/Switch.png"/>
+        <FILE id="kzqkai" name="LED_on.png" compile="0" resource="1" file="Source/Asset/LED_on.png"/>
+        <FILE id="w3YEy1" name="LED_on_2.png" compile="0" resource="1" file="Source/Asset/LED_on_2.png"/>
+        <FILE id="piFvWY" name="LED_off.png" compile="0" resource="1" file="Source/Asset/LED_off.png"/>
+        <FILE id="QJm67F" name="LED_changeable.png" compile="0" resource="1"
+              file="Source/Asset/LED_changeable.png"/>
         <FILE id="hRs1oU" name="Knob_large.png" compile="0" resource="1" file="Source/Asset/Knob_large.png"/>
         <FILE id="PSILqf" name="Knob_medium.png" compile="0" resource="1" file="Source/Asset/Knob_medium.png"/>
         <FILE id="AHn0sp" name="Knob_small.png" compile="0" resource="1" file="Source/Asset/Knob_small.png"/>
@@ -24,24 +32,28 @@
               file="Source/Processor/PluginProcessor.h"/>
       </GROUP>
       <GROUP id="{91498994-D6B1-8279-5B35-787ED43F801A}" name="GUI">
-        <FILE id="QROpL5" name="LargeKnob.cpp" compile="1" resource="0" file="Source/GUI/LargeKnob.cpp"/>
-        <FILE id="Guq3EU" name="LargeKnob.h" compile="0" resource="0" file="Source/GUI/LargeKnob.h"/>
-        <FILE id="jIDfcb" name="LargeKnobLookAndFeel.cpp" compile="1" resource="0"
-              file="Source/GUI/LargeKnobLookAndFeel.cpp"/>
-        <FILE id="woqef1" name="LargeKnobLookAndFeel.h" compile="0" resource="0"
-              file="Source/GUI/LargeKnobLookAndFeel.h"/>
-        <FILE id="wwi0mv" name="MediumKnob.cpp" compile="1" resource="0" file="Source/GUI/MediumKnob.cpp"/>
-        <FILE id="QTDuHr" name="MediumKnob.h" compile="0" resource="0" file="Source/GUI/MediumKnob.h"/>
-        <FILE id="Pl9SGu" name="MediumKnobLookAndFeel.cpp" compile="1" resource="0"
-              file="Source/GUI/MediumKnobLookAndFeel.cpp"/>
-        <FILE id="CmTaRy" name="MediumKnobLookAndFeel.h" compile="0" resource="0"
-              file="Source/GUI/MediumKnobLookAndFeel.h"/>
-        <FILE id="kXmbqY" name="SmallKnob.cpp" compile="1" resource="0" file="Source/GUI/SmallKnob.cpp"/>
-        <FILE id="VPAutt" name="SmallKnob.h" compile="0" resource="0" file="Source/GUI/SmallKnob.h"/>
-        <FILE id="gMaXLI" name="SmallKnobLookAndFeel.cpp" compile="1" resource="0"
-              file="Source/GUI/SmallKnobLookAndFeel.cpp"/>
-        <FILE id="E3aezq" name="SmallKnobLookAndFeel.h" compile="0" resource="0"
-              file="Source/GUI/SmallKnobLookAndFeel.h"/>
+        <FILE id="dZeMAV" name="GainLED.cpp" compile="1" resource="0" file="Source/GUI/GainLED.cpp"/>
+        <FILE id="GCcuNT" name="GainLED.h" compile="0" resource="0" file="Source/GUI/GainLED.h"/>
+        <FILE id="QROpL5" name="Knob.cpp" compile="1" resource="0" file="Source/GUI/Knob.cpp"/>
+        <FILE id="Guq3EU" name="Knob.h" compile="0" resource="0" file="Source/GUI/Knob.h"/>
+        <FILE id="jIDfcb" name="KnobLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/KnobLookAndFeel.cpp"/>
+        <FILE id="woqef1" name="KnobLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/KnobLookAndFeel.h"/>
+        <FILE id="sczuCL" name="Label.cpp" compile="1" resource="0" file="Source/GUI/Label.cpp"/>
+        <FILE id="Sr0Qt8" name="Label.h" compile="0" resource="0" file="Source/GUI/Label.h"/>
+        <FILE id="qp96td" name="LabelLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/LabelLookAndFeel.cpp"/>
+        <FILE id="xbXfID" name="LabelLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/LabelLookAndFeel.h"/>
+        <FILE id="M09utP" name="StageLED.cpp" compile="1" resource="0" file="Source/GUI/StageLED.cpp"/>
+        <FILE id="vPgvaU" name="StageLED.h" compile="0" resource="0" file="Source/GUI/StageLED.h"/>
+        <FILE id="EN3yjW" name="Switch.cpp" compile="1" resource="0" file="Source/GUI/Switch.cpp"/>
+        <FILE id="kp3Gyq" name="Switch.h" compile="0" resource="0" file="Source/GUI/Switch.h"/>
+        <FILE id="xHZ4bU" name="SwitchLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/SwitchLookAndFeel.cpp"/>
+        <FILE id="uuZm5J" name="SwitchLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/SwitchLookAndFeel.h"/>
       </GROUP>
     </GROUP>
   </MAINGROUP>
