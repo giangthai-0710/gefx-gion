@@ -6,7 +6,24 @@
               pluginVST3Category="Distortion,Fx" pluginFormats="buildStandalone,buildVST3">
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
+      <GROUP id="{5F3921D5-82E6-6F64-0519-CFD28C2B6AB5}" name="Service">
+        <FILE id="l0rByv" name="PresetManager.cpp" compile="1" resource="0"
+              file="Source/Service/PresetManager.cpp"/>
+        <FILE id="sf4hsa" name="PresetManager.h" compile="0" resource="0" file="Source/Service/PresetManager.h"/>
+      </GROUP>
       <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
+        <FILE id="be77Ug" name="Save_button_clicked.png" compile="0" resource="1"
+              file="Source/Asset/Save_button_clicked.png"/>
+        <FILE id="pWtvYl" name="Next_button_clicked.png" compile="0" resource="1"
+              file="Source/Asset/Next_button_clicked.png"/>
+        <FILE id="Atw4Kk" name="Next_button_normal.png" compile="0" resource="1"
+              file="Source/Asset/Next_button_normal.png"/>
+        <FILE id="mqHVQD" name="Previous_button_clicked.png" compile="0" resource="1"
+              file="Source/Asset/Previous_button_clicked.png"/>
+        <FILE id="EOUSLt" name="Previous_button_normal.png" compile="0" resource="1"
+              file="Source/Asset/Previous_button_normal.png"/>
+        <FILE id="ZhBbYV" name="Save_button_normal.png" compile="0" resource="1"
+              file="Source/Asset/Save_button_normal.png"/>
         <FILE id="GGmOfK" name="Background.png" compile="0" resource="1" file="Source/Asset/Background.png"/>
         <FILE id="shPIZL" name="Switch_pressed.png" compile="0" resource="1"
               file="Source/Asset/Switch_pressed.png"/>
@@ -35,6 +52,10 @@
       <GROUP id="{91498994-D6B1-8279-5B35-787ED43F801A}" name="GUI">
         <FILE id="dZeMAV" name="GainLED.cpp" compile="1" resource="0" file="Source/GUI/GainLED.cpp"/>
         <FILE id="GCcuNT" name="GainLED.h" compile="0" resource="0" file="Source/GUI/GainLED.h"/>
+        <FILE id="vWnoNm" name="GeneralLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/GeneralLookAndFeel.cpp"/>
+        <FILE id="gwa8WH" name="GeneralLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/GeneralLookAndFeel.h"/>
         <FILE id="QROpL5" name="Knob.cpp" compile="1" resource="0" file="Source/GUI/Knob.cpp"/>
         <FILE id="Guq3EU" name="Knob.h" compile="0" resource="0" file="Source/GUI/Knob.h"/>
         <FILE id="jIDfcb" name="KnobLookAndFeel.cpp" compile="1" resource="0"
@@ -47,6 +68,8 @@
               file="Source/GUI/LabelLookAndFeel.cpp"/>
         <FILE id="xbXfID" name="LabelLookAndFeel.h" compile="0" resource="0"
               file="Source/GUI/LabelLookAndFeel.h"/>
+        <FILE id="tbguTB" name="PresetPanel.cpp" compile="1" resource="0" file="Source/GUI/PresetPanel.cpp"/>
+        <FILE id="eEewi1" name="PresetPanel.h" compile="0" resource="0" file="Source/GUI/PresetPanel.h"/>
         <FILE id="M09utP" name="StageLED.cpp" compile="1" resource="0" file="Source/GUI/StageLED.cpp"/>
         <FILE id="vPgvaU" name="StageLED.h" compile="0" resource="0" file="Source/GUI/StageLED.h"/>
         <FILE id="EN3yjW" name="Switch.cpp" compile="1" resource="0" file="Source/GUI/Switch.cpp"/>

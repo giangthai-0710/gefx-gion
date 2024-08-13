@@ -2,7 +2,7 @@
 #include "Knob.h"
 
 //==============================================================================
-Knob::Knob()
+GUI::Knob::Knob()
 {
 	setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     setLookAndFeel(&knobLookAndFeel);
@@ -11,17 +11,17 @@ Knob::Knob()
 	knobType = "null";
 }
 
-Knob::~Knob()
+GUI::Knob::~Knob()
 {
     setLookAndFeel(nullptr);
 }
 
-void Knob::setKnobType(juce::String type)
+void GUI::Knob::setKnobType(juce::String type)
 {
     this->knobType = type;
 }
 
-void Knob::setKnobSize(juce::String size)
+void GUI::Knob::setKnobSize(juce::String size)
 {
 	if (size == "large")
 	{
@@ -40,7 +40,7 @@ void Knob::setKnobSize(juce::String size)
 	}
 }
 
-juce::String Knob::getTextFromValue(double value)
+juce::String GUI::Knob::getTextFromValue(double value)
 {
     if (knobType == "volume")
     {

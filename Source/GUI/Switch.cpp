@@ -2,7 +2,7 @@
 #include "Switch.h"
 
 //==============================================================================
-Switch::Switch()
+GUI::Switch::Switch()
 {
     switchImage = juce::ImageCache::getFromMemory(BinaryData::Switch_png, BinaryData::Switch_pngSize);
     switchPressedImage = juce::ImageCache::getFromMemory(BinaryData::Switch_pressed_png, BinaryData::Switch_pressed_pngSize);
@@ -15,11 +15,11 @@ Switch::Switch()
         }; // When the button is clicked, set the button to be pressed
 }
 
-Switch::~Switch()
+GUI::Switch::~Switch()
 {
 }
 
-void Switch::paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void GUI::Switch::paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
     if (!isPressed)
     {

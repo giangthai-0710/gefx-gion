@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "DistortionDSP.h"
 
+#include "../Service/PresetManager.h"
+
 //==============================================================================
 // Declare aliases 
 using Filter = juce::dsp::IIR::Filter<float>;
@@ -76,6 +78,8 @@ public:
 
     float getRMSLevel();
 
+    Service::PresetManager& getPresetManager() { return *presetManager; }
+
 private:
     //==============================================================================
     // Filters
@@ -94,7 +98,7 @@ private:
         trebleFilter
     };
 
-    float bassFrequency = 120.0f, midFrequency = 1000.0f, trebleFrequency = 8000.0f;
+    float bassFrequency = 120.0f, midFrequency = 800.0f, trebleFrequency = 4000.0f;
 
     float bassQ = 0.707f, midQ = 0.707f, trebleQ = 0.707f;
 
@@ -105,7 +109,7 @@ private:
 
     //==============================================================================
     // Distortion
-    DistortionDSP distortionStage;
+    DSP::DistortionDSP distortionStage;
 
     float distortionLevelLeft, distortionLevelRight, distortionLevel;
 
@@ -114,6 +118,8 @@ private:
                                              postGainLowPassFilter;
     juce::dsp::ProcessSpec processSpec;
 
+    //==============================================================================
+    std::unique_ptr<Service::PresetManager> presetManager;
  
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GiONAudioProcessor)

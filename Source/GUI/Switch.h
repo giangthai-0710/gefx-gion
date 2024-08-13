@@ -4,35 +4,36 @@
 
 #include "../GUI/SwitchLookAndFeel.h"
 
-//==============================================================================
-/*
-*/
-class Switch  : public juce::ToggleButton, private juce::Timer
+namespace GUI
 {
-public:
-    Switch();
-    ~Switch() override;
-
-    void paintButton (juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
-
-    void isJustClicked()
+    class Switch : public juce::ToggleButton, private juce::Timer
     {
-        startTimer(100); // Start a timer to reset the button to be unpressed after 100ms
-        isPressed = true; // Set the button to be pressed
-        repaint(); // Repaint the button
-    }
+    public:
+        Switch();
+        ~Switch() override;
 
-private:
-    juce::Image switchImage, switchPressedImage;
+        void paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
-    bool isPressed = false;
+        void isJustClicked()
+        {
+            startTimer(100); // Start a timer to reset the button to be unpressed after 100ms
+            isPressed = true; // Set the button to be pressed
+            repaint(); // Repaint the button
+        }
 
-    void timerCallback() override
-    {
-        stopTimer();
-        isPressed = false;
-        repaint();
-    }
+    private:
+        juce::Image switchImage, switchPressedImage;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Switch)
-};
+        bool isPressed = false;
+
+        void timerCallback() override
+        {
+            stopTimer();
+            isPressed = false;
+            repaint();
+        }
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Switch)
+    };
+}
+

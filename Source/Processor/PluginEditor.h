@@ -17,6 +17,9 @@
 #include "../GUI/StageLED.h"
 #include "../GUI/GainLED.h"
 
+#include "../GUI/GeneralLookAndFeel.h"
+#include "../GUI/PresetPanel.h"
+
 //==============================================================================
 /**
 */
@@ -35,20 +38,27 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
+    LookAndFeel::GeneralLNF generalLNF;
+
+
     juce::Image background;
+
+    juce::TooltipWindow tooltipWindow;
 
     GiONAudioProcessor& audioProcessor;
 
-    Knob gainKnob, crunchKnob, volumeKnob, 
+    GUI::Knob gainKnob, crunchKnob, volumeKnob,
          preBassKnob, preMidKnob, preTrebleKnob, 
          postBassKnob, postMidKnob, postTrebleKnob;
 
-    Label gainLabel, crunchLabel, volumeLabel, 
+    GUI::Label gainLabel, crunchLabel, volumeLabel,
           preBassLabel, preMidLabel, preTrebleLabel, 
           postBassLabel, postMidLabel, postTrebleLabel,
           bypassLabel, changeStageLabel;
 
-    Switch bypassSwitch, changeStageSwitch;
+    GUI::Switch bypassSwitch, changeStageSwitch;
+
+    GUI::PresetPanel presetPanel;
 
     StageLED stageLED;
     GainLED gainLED;

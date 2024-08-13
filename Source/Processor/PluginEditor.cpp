@@ -11,16 +11,15 @@
 
 //==============================================================================
 GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p),
+      presetPanel(p.getPresetManager())
 {
     // Set the window title
     setTitle("GiON");
     // Set the window size
-    setSize (480, 270);
+    setSize (480, 360);
 
     background = juce::ImageCache::getFromMemory(BinaryData::Background_png, BinaryData::Background_pngSize);
-
-    getLookAndFeel().getDefaultLookAndFeel().setDefaultSansSerifTypefaceName("Arial");
 
     // Gain knob
     gainKnob.setRange(-6.0f, 15.0f, 0.1f);
@@ -52,7 +51,7 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     preBassKnob.setKnobSize("medium");
     preBassKnob.setKnobType("volume");
 
-    preBassLabel.setText("BASS", juce::dontSendNotification);
+    preBassLabel.setText("PRE BASS", juce::dontSendNotification);
 
     // Pre mid knob
     preMidKnob.setRange(-12.0f, 12.0f, 0.1f);
@@ -60,7 +59,7 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     preMidKnob.setKnobSize("medium");
     preMidKnob.setKnobType("volume");
 
-    preMidLabel.setText("MID", juce::dontSendNotification);
+    preMidLabel.setText("PRE MID", juce::dontSendNotification);
 
     // Pre treble knob
     preTrebleKnob.setRange(-12.0f, 12.0f, 0.1f);
@@ -68,7 +67,7 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     preTrebleKnob.setKnobSize("medium");
     preTrebleKnob.setKnobType("volume");
 
-    preTrebleLabel.setText("TREBLE", juce::dontSendNotification);
+    preTrebleLabel.setText("PRE TREB", juce::dontSendNotification);
 
     // Post bass knob
     postBassKnob.setRange(-12.0f, 12.0f, 0.1f);
@@ -76,7 +75,7 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     postBassKnob.setKnobSize("medium");
     postBassKnob.setKnobType("volume");
 
-    postBassLabel.setText("BASS", juce::dontSendNotification);
+    postBassLabel.setText("POST BASS", juce::dontSendNotification);
 
     // Post mid knob
     postMidKnob.setRange(-12.0f, 12.0f, 0.1f);
@@ -84,7 +83,7 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     postMidKnob.setKnobSize("medium");
     postMidKnob.setKnobType("volume");
 
-    postMidLabel.setText("MID", juce::dontSendNotification);
+    postMidLabel.setText("POST MID", juce::dontSendNotification);
 
     // Post treble knob
     postTrebleKnob.setRange(-12.0f, 12.0f, 0.1f);
@@ -92,10 +91,22 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     postTrebleKnob.setKnobSize("medium");
     postTrebleKnob.setKnobType("volume");
 
-    postTrebleLabel.setText("TREBLE", juce::dontSendNotification);
+    postTrebleLabel.setText("POST TREB", juce::dontSendNotification);
 
     // Bypass switch
-    bypassSwitch.setToggleState(true, juce::dontSendNotification);
+    if (p.apvts.getRawParameterValue("distortionBypass")->load() == 1)
+    {
+        bypassSwitch.setToggleState(false, juce::dontSendNotification);
+        gainLED.setIsOn(true);
+        stageLED.setIsOn(true);
+	}
+    else
+    {
+		bypassSwitch.setToggleState(true, juce::dontSendNotification);
+        gainLED.setIsOn(false);
+		stageLED.setIsOn(false);
+    }
+
     bypassSwitch.onClick = [this]
     {
         gainLED.setIsOn(!bypassSwitch.getToggleState());
@@ -103,9 +114,18 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
         bypassSwitch.isJustClicked();
 	};
 
-    bypassLabel.setText("BYPASS", juce::dontSendNotification);
+    // Change stage switch
+    if (p.apvts.getRawParameterValue("distortionStage")->load() == 1)
+    {
+		changeStageSwitch.setToggleState(false, juce::dontSendNotification);
+        stageLED.setDistortionStage(2);
+    }
+    else
+    {
+        changeStageSwitch.setToggleState(true, juce::dontSendNotification);
+        stageLED.setDistortionStage(1);
+    }
 
-	// Change stage switch
     changeStageSwitch.setToggleState(true, juce::dontSendNotification);
 	changeStageSwitch.onClick = [this]
 	{
@@ -113,15 +133,7 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
         changeStageSwitch.isJustClicked();
 	};
 
-    changeStageLabel.setText("STAGE", juce::dontSendNotification);
-
-    // LED
-    stageLED.setIsOn(bypassSwitch.getToggleState());
-    stageLED.setDistortionStage(1);
-
-    gainLED.setIsOn(bypassSwitch.getToggleState());
-    gainLED.setGainPercentage(0.5f);
-    
+    changeStageLabel.setText("STAGE", juce::dontSendNotification);    
 
     // Add attachments
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "gain", gainKnob);
@@ -174,12 +186,14 @@ GiONAudioProcessorEditor::GiONAudioProcessorEditor (GiONAudioProcessor& p)
     addAndMakeVisible(stageLED);
     addAndMakeVisible(gainLED);
 
+    addAndMakeVisible(presetPanel);
+
     startTimerHz(30);
 }
 
 GiONAudioProcessorEditor::~GiONAudioProcessorEditor()
 {
-    
+       
 }
 
 void GiONAudioProcessorEditor::timerCallback()
@@ -191,7 +205,8 @@ void GiONAudioProcessorEditor::timerCallback()
 //==============================================================================
 void GiONAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.drawImage(background, 0, 0, getWidth(), getHeight(), 0, 0, background.getWidth(), background.getHeight());
+    g.fillAll(juce::Colour(0xff1A1A1A));
+    g.drawImage(background, 0, 35, 480, 270, 0, 0, background.getWidth(), background.getHeight());
 }
 
 void GiONAudioProcessorEditor::resized()
@@ -203,29 +218,33 @@ void GiONAudioProcessorEditor::resized()
     auto verticalMargin = 10;
     auto horizontalMargin = 10;
 
-    // General grid lines
+    // Bounds for all the components including tooltips and save/load buttons
     auto topLine = verticalMargin;
     auto bottomLine = windowHeight - verticalMargin;
     auto leftLine = horizontalMargin;
     auto rightLine = windowWidth - horizontalMargin;
 
-    auto verticalMiddleLine = windowWidth / 2;
-    auto horizontalMiddleLine = windowHeight / 2;
+    // Bound for the plugin components
+    auto pluginTopLine = topLine + 35;
+    auto pluginBottomLine = bottomLine - 55; 
+    auto pluginLeftLine = leftLine;
+    auto pluginRightLine = rightLine;
 
-    auto firstVerticalQuarterLine = windowWidth / 4;
-    auto thirdVerticalQuarterLine = firstVerticalQuarterLine * 3;
+    // We divide the window in 8 vertical sections and 6 horizontal sections
+    auto firstVerticalEighthLine = leftLine + (rightLine - leftLine) / 8;
+    auto secondVerticalEighthLine = leftLine + (rightLine - leftLine) / 8 * 2;
+    auto thirdVerticalEighthLine = leftLine + (rightLine - leftLine) / 8 * 3;
+    auto fourthVerticalEighthLine = leftLine + (rightLine - leftLine) / 8 * 4;
+    auto fifthVerticalEighthLine = leftLine + (rightLine - leftLine) / 8 * 5;
+    auto sixthVerticalEighthLine = leftLine + (rightLine - leftLine) / 8 * 6;
+    auto seventhVerticalEighthLine = leftLine + (rightLine - leftLine) / 8 * 7;
 
-    auto firstVerticalEighthLine = windowWidth / 8;
-    auto secondVerticalEighthLine = firstVerticalEighthLine * 2;
-    auto thirdVerticalEighthLine = firstVerticalEighthLine * 3;
-    auto fifthVerticalEighthLine = firstVerticalEighthLine * 5;
-    auto sixthVerticalEighthLine = firstVerticalEighthLine * 6;
-    auto seventhVerticalEighthLine = firstVerticalEighthLine * 7;
+    auto firstHorizontalSixthLine = pluginTopLine + (pluginBottomLine - pluginTopLine) / 6;
+    auto secondHorizontalSixthLine = pluginTopLine + (pluginBottomLine - pluginTopLine) / 6 * 2;
+    auto thirdHorizontalSixthLine = pluginTopLine + (pluginBottomLine - pluginTopLine) / 6 * 3;
+    auto fourthHorizontalSixthLine = pluginTopLine + (pluginBottomLine - pluginTopLine) / 6 * 4;
+    auto fifthHorizontalSixthLine = pluginTopLine + (pluginBottomLine - pluginTopLine) / 6 * 5;
 
-    auto firstHorizontalSixthLine = windowHeight / 6;
-    auto secondHorizontalSixthLine = firstHorizontalSixthLine * 2;
-    auto fourthHorizontalSixthLine = firstHorizontalSixthLine * 4;
-    auto lastHorizontalSixthLine = firstHorizontalSixthLine * 5;
 
     // Knobs and labels dimensions
     auto largeKnobWidth = 96;
@@ -268,40 +287,42 @@ void GiONAudioProcessorEditor::resized()
     auto ledDeltaY = ledHeight / 2 - 10; // We subtract 10 since the LED is just 10 pixels, the LED png is large due to the glow effect
 
     // Knobs and labels positions
-    gainKnob.setBounds(firstVerticalQuarterLine, secondHorizontalSixthLine, smallKnobWidth, smallKnobHeight);
-    gainLabel.setBounds(firstVerticalQuarterLine + smallKnobDeltaX - labelDeltaX, secondHorizontalSixthLine + smallKnobDeltaY + smallKnobLabelDeltaY, labelWidth, labelHeight);
+    gainKnob.setBounds(secondVerticalEighthLine, secondHorizontalSixthLine, smallKnobWidth, smallKnobHeight);
+    gainLabel.setBounds(secondVerticalEighthLine + smallKnobDeltaX - labelDeltaX, secondHorizontalSixthLine + smallKnobDeltaY + smallKnobLabelDeltaY, labelWidth, labelHeight);
 
-    crunchKnob.setBounds(verticalMiddleLine - largeKnobDeltaX, horizontalMiddleLine - largeKnobDeltaY, largeKnobWidth, largeKnobHeight);
-    crunchLabel.setBounds(verticalMiddleLine - labelDeltaX, horizontalMiddleLine + largeKnobLabelDeltaY, labelWidth, labelHeight);
+    crunchKnob.setBounds(fourthVerticalEighthLine - largeKnobDeltaX, thirdHorizontalSixthLine - largeKnobDeltaY, largeKnobWidth, largeKnobHeight);
+    crunchLabel.setBounds(fourthVerticalEighthLine - labelDeltaX, thirdHorizontalSixthLine + largeKnobLabelDeltaY, labelWidth, labelHeight);
 
-    volumeKnob.setBounds(thirdVerticalQuarterLine - smallKnobWidth, secondHorizontalSixthLine, smallKnobWidth, smallKnobHeight);
-    volumeLabel.setBounds(thirdVerticalQuarterLine - smallKnobDeltaX - labelDeltaX, secondHorizontalSixthLine + smallKnobDeltaY + smallKnobLabelDeltaY, labelWidth, labelHeight);
+    volumeKnob.setBounds(sixthVerticalEighthLine - smallKnobWidth, secondHorizontalSixthLine, smallKnobWidth, smallKnobHeight);
+    volumeLabel.setBounds(sixthVerticalEighthLine - smallKnobDeltaX - labelDeltaX, secondHorizontalSixthLine + smallKnobDeltaY + smallKnobLabelDeltaY, labelWidth, labelHeight);
     
-    preBassKnob.setBounds(leftLine, horizontalMiddleLine - mediumKnobDeltaY, mediumKnobWidth, mediumKnobHeight);
-    preBassLabel.setBounds(leftLine, horizontalMiddleLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
+    preBassKnob.setBounds(leftLine, thirdHorizontalSixthLine - mediumKnobDeltaY, mediumKnobWidth, mediumKnobHeight);
+    preBassLabel.setBounds(leftLine, thirdHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    preMidKnob.setBounds(leftLine, topLine, mediumKnobWidth, mediumKnobHeight);
+    preMidKnob.setBounds(leftLine, pluginTopLine, mediumKnobWidth, mediumKnobHeight);
     preMidLabel.setBounds(leftLine, firstHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    preTrebleKnob.setBounds(thirdVerticalEighthLine - mediumKnobDeltaX, topLine, mediumKnobWidth, mediumKnobHeight);
+    preTrebleKnob.setBounds(thirdVerticalEighthLine - mediumKnobDeltaX, pluginTopLine, mediumKnobWidth, mediumKnobHeight);
     preTrebleLabel.setBounds(thirdVerticalEighthLine - labelDeltaX, firstHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    postBassKnob.setBounds(rightLine - mediumKnobWidth, horizontalMiddleLine - mediumKnobDeltaY, mediumKnobWidth, mediumKnobHeight);
-    postBassLabel.setBounds(rightLine - mediumKnobWidth, horizontalMiddleLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
+    postBassKnob.setBounds(rightLine - mediumKnobWidth, thirdHorizontalSixthLine - mediumKnobDeltaY, mediumKnobWidth, mediumKnobHeight);
+    postBassLabel.setBounds(rightLine - mediumKnobWidth, thirdHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    postMidKnob.setBounds(rightLine - mediumKnobWidth, topLine, mediumKnobWidth, mediumKnobHeight);
+    postMidKnob.setBounds(rightLine - mediumKnobWidth, pluginTopLine, mediumKnobWidth, mediumKnobHeight);
     postMidLabel.setBounds(rightLine - mediumKnobDeltaX - labelDeltaX, firstHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    postTrebleKnob.setBounds(fifthVerticalEighthLine - mediumKnobDeltaX, topLine, mediumKnobWidth, mediumKnobHeight);
+    postTrebleKnob.setBounds(fifthVerticalEighthLine - mediumKnobDeltaX, pluginTopLine, mediumKnobWidth, mediumKnobHeight);
     postTrebleLabel.setBounds(fifthVerticalEighthLine - labelDeltaX, firstHorizontalSixthLine + mediumKnobLabelDeltaY, labelWidth, labelHeight);
 
-    bypassSwitch.setBounds(seventhVerticalEighthLine - switchDeltaX, lastHorizontalSixthLine - switchDeltaY, switchWidth, switchHeight);
-    bypassLabel.setBounds(seventhVerticalEighthLine - labelDeltaX, lastHorizontalSixthLine + switchDeltaY, labelWidth, labelHeight);
+    bypassSwitch.setBounds(seventhVerticalEighthLine - switchDeltaX, fifthHorizontalSixthLine - switchDeltaY, switchWidth, switchHeight);
+    bypassLabel.setBounds(seventhVerticalEighthLine - labelDeltaX, fifthHorizontalSixthLine + switchDeltaY, labelWidth, labelHeight);
 
-    changeStageSwitch.setBounds(firstVerticalEighthLine - switchDeltaX, lastHorizontalSixthLine - switchDeltaY, switchWidth, switchHeight);
-    changeStageLabel.setBounds(firstVerticalEighthLine - labelDeltaX, lastHorizontalSixthLine + switchDeltaY, labelWidth, labelHeight);
+    changeStageSwitch.setBounds(firstVerticalEighthLine - switchDeltaX, fifthHorizontalSixthLine - switchDeltaY, switchWidth, switchHeight);
+    changeStageLabel.setBounds(firstVerticalEighthLine - labelDeltaX, fifthHorizontalSixthLine + switchDeltaY, labelWidth, labelHeight);
 
     gainLED.setBounds(seventhVerticalEighthLine - ledDeltaX, fourthHorizontalSixthLine - ledDeltaY, ledWidth, ledHeight);
     stageLED.setBounds(firstVerticalEighthLine - ledDeltaX, fourthHorizontalSixthLine - ledDeltaY, ledWidth, ledHeight);
+
+    presetPanel.setBounds(0, 0, rightLine - leftLine, 30); 
 }
 

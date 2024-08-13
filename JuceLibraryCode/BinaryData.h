@@ -8,6 +8,24 @@
 
 namespace BinaryData
 {
+    extern const char*   Save_button_clicked_png;
+    const int            Save_button_clicked_pngSize = 396;
+
+    extern const char*   Next_button_clicked_png;
+    const int            Next_button_clicked_pngSize = 331;
+
+    extern const char*   Next_button_normal_png;
+    const int            Next_button_normal_pngSize = 365;
+
+    extern const char*   Previous_button_clicked_png;
+    const int            Previous_button_clicked_pngSize = 394;
+
+    extern const char*   Previous_button_normal_png;
+    const int            Previous_button_normal_pngSize = 436;
+
+    extern const char*   Save_button_normal_png;
+    const int            Save_button_normal_pngSize = 501;
+
     extern const char*   Background_png;
     const int            Background_pngSize = 110966;
 
@@ -39,7 +57,7 @@ namespace BinaryData
     const int            Knob_small_pngSize = 48940;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 10;
+    const int namedResourceListSize = 16;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

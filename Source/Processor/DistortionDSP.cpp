@@ -1,6 +1,6 @@
 #include "DistortionDSP.h"
 
-DistortionDSP::DistortionDSP()
+DSP::DistortionDSP::DistortionDSP()
 {
 	this->crunch = 0.0f;
 	this->gain = 0.0f;
@@ -8,46 +8,46 @@ DistortionDSP::DistortionDSP()
 	this->distortionStage = 1;
 }
 
-DistortionDSP::~DistortionDSP()
+DSP::DistortionDSP::~DistortionDSP()
 {
 }
 
-void DistortionDSP::setCrunch(float crunch)
+void DSP::DistortionDSP::setCrunch(float crunch)
 {
 	this->crunch = crunch;
 }
 
-void DistortionDSP::setGain(float gain)
+void DSP::DistortionDSP::setGain(float gain)
 {
 	this->gain = gain;
 }
 
-void DistortionDSP::setVolume(float volume)
+void DSP::DistortionDSP::setVolume(float volume)
 {
 	this->volume = volume;
 }
 
-void DistortionDSP::setDistortionStage(int stage)
+void DSP::DistortionDSP::setDistortionStage(int stage)
 {
 	this->distortionStage = stage;
 }
 
-float DistortionDSP::getCrunch()
+float DSP::DistortionDSP::getCrunch()
 {
 	return this->crunch;
 }
 
-float DistortionDSP::getGain()
+float DSP::DistortionDSP::getGain()
 {
 	return this->gain;
 }
 
-float DistortionDSP::getVolume()
+float DSP::DistortionDSP::getVolume()
 {
 	return this->volume;
 }
 
-float DistortionDSP::process(float sample)
+float DSP::DistortionDSP::process(float sample)
 {
 	// Apply pre distortion gain
 	sample = preGainProcessing(sample);

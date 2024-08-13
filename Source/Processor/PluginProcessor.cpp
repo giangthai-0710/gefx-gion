@@ -35,6 +35,11 @@ GiONAudioProcessor::GiONAudioProcessor()
     postGainLowPassFilter.setResonance(0.7071f);
 
     distortionStage.setDistortionStage(1);
+
+    apvts.state.setProperty(Service::PresetManager::presetNameProperty, "", nullptr);
+    apvts.state.setProperty("version", ProjectInfo::versionString, nullptr);
+
+    presetManager = std::make_unique<Service::PresetManager>(apvts);
 }
 
 GiONAudioProcessor::~GiONAudioProcessor()
@@ -191,6 +196,7 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     distortionLevel = (distortionLevelLeft + distortionLevelRight);
     buffer.applyGain(1.0f / parameters.distortionGain);
 
+
     if (!parameters.distortionBypass)
     {
         // Anti-aliasing filter
@@ -220,9 +226,6 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         postLeftFilter.process(leftContext);
         postRightFilter.process(rightContext);
 	}
-
-    
-
 }
 
 //==============================================================================
@@ -239,15 +242,24 @@ juce::AudioProcessorEditor* GiONAudioProcessor::createEditor()
 //==============================================================================
 void GiONAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xmlState(state.createXml());
+    copyXmlToBinary(*xmlState, destData);
 }
 
 void GiONAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+	{
+		if (xmlState->hasTagName(apvts.state.getType()))
+		{
+			apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
+            updateParameters();
+            updateFilters();
+		}
+	}
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createParameterLayout()
