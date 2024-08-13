@@ -37,7 +37,6 @@ GiONAudioProcessor::GiONAudioProcessor()
     distortionStage.setDistortionStage(1);
 
     apvts.state.setProperty(Service::PresetManager::presetNameProperty, "", nullptr);
-    apvts.state.setProperty("version", ProjectInfo::versionString, nullptr);
 
     presetManager = std::make_unique<Service::PresetManager>(apvts);
 }

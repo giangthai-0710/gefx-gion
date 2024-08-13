@@ -6,7 +6,7 @@
 
 namespace GUI
 {
-	class PresetPanel : public juce::Component, juce::Button::Listener, juce::ComboBox::Listener
+	class PresetPanel : public juce::Component, juce::Button::Listener, juce::ComboBox::Listener, juce::KeyListener
 	{
 	public:
 		PresetPanel(Service::PresetManager& pm);
@@ -21,6 +21,8 @@ namespace GUI
 		void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
 		void buttonConfiguration(juce::ImageButton& button, const juce::Image& normalImage, const juce::Image& downImage);
+
+		bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
 
 		void loadPresetList();
 

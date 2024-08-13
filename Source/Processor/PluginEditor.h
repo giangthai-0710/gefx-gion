@@ -23,7 +23,7 @@
 //==============================================================================
 /**
 */
-class GiONAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
+class GiONAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer
 {
 public:
     GiONAudioProcessorEditor (GiONAudioProcessor&);

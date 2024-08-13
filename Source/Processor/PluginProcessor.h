@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "DistortionDSP.h"
+#include "../DSP/DistortionDSP.h"
 
 #include "../Service/PresetManager.h"
 

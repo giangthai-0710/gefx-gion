@@ -2,6 +2,8 @@
 
 GUI::PresetPanel::PresetPanel(Service::PresetManager& pm) : presetManager(pm)
 {
+	setWantsKeyboardFocus(true);
+
 	previousNormalImage = juce::ImageCache::getFromMemory(BinaryData::Previous_button_normal_png, BinaryData::Previous_button_normal_pngSize);
 	previousDownImage = juce::ImageCache::getFromMemory(BinaryData::Previous_button_clicked_png, BinaryData::Previous_button_clicked_pngSize);
 
@@ -22,6 +24,8 @@ GUI::PresetPanel::PresetPanel(Service::PresetManager& pm) : presetManager(pm)
 	addAndMakeVisible(presetList);
 	presetList.addListener(this);
 
+	addKeyListener(this);
+
 	loadPresetList();
 
 }
@@ -33,6 +37,8 @@ GUI::PresetPanel::~PresetPanel()
 	savePresetButton.removeListener(this);
 
 	presetList.removeListener(this);
+
+	removeKeyListener(this);
 }
 
 void GUI::PresetPanel::resized()
@@ -99,6 +105,22 @@ void GUI::PresetPanel::buttonConfiguration(juce::ImageButton& button, const juce
 	button.setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	addAndMakeVisible(button);
 	button.addListener(this);
+}
+
+bool GUI::PresetPanel::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+{
+	if (key == juce::KeyPress::rightKey)
+	{
+		DBG("Right key pressed");
+		nextPresetButton.triggerClick();
+		
+	}
+	else if (key == juce::KeyPress::leftKey)
+	{
+		DBG("Left key pressed");
+		previousPresetButton.triggerClick();
+	}
+	return false;
 }
 
 void GUI::PresetPanel::loadPresetList()

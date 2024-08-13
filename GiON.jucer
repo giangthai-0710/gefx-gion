@@ -6,11 +6,6 @@
               pluginVST3Category="Distortion,Fx" pluginFormats="buildStandalone,buildVST3">
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
-      <GROUP id="{5F3921D5-82E6-6F64-0519-CFD28C2B6AB5}" name="Service">
-        <FILE id="l0rByv" name="PresetManager.cpp" compile="1" resource="0"
-              file="Source/Service/PresetManager.cpp"/>
-        <FILE id="sf4hsa" name="PresetManager.h" compile="0" resource="0" file="Source/Service/PresetManager.h"/>
-      </GROUP>
       <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
         <FILE id="be77Ug" name="Save_button_clicked.png" compile="0" resource="1"
               file="Source/Asset/Save_button_clicked.png"/>
@@ -37,17 +32,10 @@
         <FILE id="PSILqf" name="Knob_medium.png" compile="0" resource="1" file="Source/Asset/Knob_medium.png"/>
         <FILE id="AHn0sp" name="Knob_small.png" compile="0" resource="1" file="Source/Asset/Knob_small.png"/>
       </GROUP>
-      <GROUP id="{A1A7B4F5-99A3-3B37-5E0D-5F12FB9489D8}" name="Processor">
-        <FILE id="zSUhDP" name="DistortionDSP.cpp" compile="1" resource="0"
-              file="Source/Processor/DistortionDSP.cpp"/>
-        <FILE id="Dg7WAj" name="DistortionDSP.h" compile="0" resource="0" file="Source/Processor/DistortionDSP.h"/>
-        <FILE id="SVs2bK" name="PluginEditor.cpp" compile="1" resource="0"
-              file="Source/Processor/PluginEditor.cpp"/>
-        <FILE id="fFwvjr" name="PluginEditor.h" compile="0" resource="0" file="Source/Processor/PluginEditor.h"/>
-        <FILE id="ebP1tF" name="PluginProcessor.cpp" compile="1" resource="0"
-              file="Source/Processor/PluginProcessor.cpp"/>
-        <FILE id="MPNQ22" name="PluginProcessor.h" compile="0" resource="0"
-              file="Source/Processor/PluginProcessor.h"/>
+      <GROUP id="{C376A7E6-4F06-3A91-2A6E-96C641911AF6}" name="DSP">
+        <FILE id="oDSU73" name="DistortionDSP.cpp" compile="1" resource="0"
+              file="Source/DSP/DistortionDSP.cpp"/>
+        <FILE id="xV3Ja8" name="DistortionDSP.h" compile="0" resource="0" file="Source/DSP/DistortionDSP.h"/>
       </GROUP>
       <GROUP id="{91498994-D6B1-8279-5B35-787ED43F801A}" name="GUI">
         <FILE id="dZeMAV" name="GainLED.cpp" compile="1" resource="0" file="Source/GUI/GainLED.cpp"/>
@@ -78,6 +66,20 @@
               file="Source/GUI/SwitchLookAndFeel.cpp"/>
         <FILE id="uuZm5J" name="SwitchLookAndFeel.h" compile="0" resource="0"
               file="Source/GUI/SwitchLookAndFeel.h"/>
+      </GROUP>
+      <GROUP id="{A1A7B4F5-99A3-3B37-5E0D-5F12FB9489D8}" name="Processor">
+        <FILE id="SVs2bK" name="PluginEditor.cpp" compile="1" resource="0"
+              file="Source/Processor/PluginEditor.cpp"/>
+        <FILE id="fFwvjr" name="PluginEditor.h" compile="0" resource="0" file="Source/Processor/PluginEditor.h"/>
+        <FILE id="ebP1tF" name="PluginProcessor.cpp" compile="1" resource="0"
+              file="Source/Processor/PluginProcessor.cpp"/>
+        <FILE id="MPNQ22" name="PluginProcessor.h" compile="0" resource="0"
+              file="Source/Processor/PluginProcessor.h"/>
+      </GROUP>
+      <GROUP id="{5F3921D5-82E6-6F64-0519-CFD28C2B6AB5}" name="Service">
+        <FILE id="l0rByv" name="PresetManager.cpp" compile="1" resource="0"
+              file="Source/Service/PresetManager.cpp"/>
+        <FILE id="sf4hsa" name="PresetManager.h" compile="0" resource="0" file="Source/Service/PresetManager.h"/>
       </GROUP>
     </GROUP>
   </MAINGROUP>
