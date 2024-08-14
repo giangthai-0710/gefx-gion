@@ -31,3 +31,18 @@ void GUI::Switch::paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighligh
     }
 }
 
+void GUI::Switch::mouseEnter(const juce::MouseEvent& event)
+{
+	isMouseOver = true;
+}
+
+void GUI::Switch::mouseExit(const juce::MouseEvent& event)
+{
+	isMouseOver = false;
+}
+
+bool GUI::Switch::hasMouseOver()
+{
+	return isMouseOver;
+}
+

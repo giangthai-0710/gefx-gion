@@ -21,6 +21,7 @@ GUI::PresetPanel::PresetPanel(Service::PresetManager& pm) : presetManager(pm)
 	presetList.setColour(juce::ComboBox::backgroundColourId, juce::Colour(0xff1A1A1A));
 	presetList.setColour(juce::ComboBox::outlineColourId, juce::Colour(0xff1A1A1A));
 	presetList.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+
 	addAndMakeVisible(presetList);
 	presetList.addListener(this);
 
@@ -51,7 +52,7 @@ void GUI::PresetPanel::resized()
 	auto buttonWidth = 20;
 	auto buttonHeight = 20;
 
-	auto comboBoxWidth = 100;
+	auto comboBoxWidth = 150;
 	auto comboBoxHeight = 20;
 
 	savePresetButton.setBounds(width - buttonWidth - padding, 5, buttonWidth, buttonHeight);

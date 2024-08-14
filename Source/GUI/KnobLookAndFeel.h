@@ -20,6 +20,9 @@ public:
 
     void setKnobSize(juce::String size);
 
+    //juce::Font getSliderPopupFont(juce::Slider&) override;
+    
+
 
 private:
     juce::Image knobImage;

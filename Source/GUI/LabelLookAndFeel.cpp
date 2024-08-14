@@ -19,7 +19,7 @@ void LabelLookAndFeel::drawLabel(juce::Graphics& g, juce::Label& label)
 	{
 		const auto font = juce::Font("Now", fontSize, juce::Font::bold);
 
-		g.setColour(juce::Colour(0xffb1b1b1));
+		g.setColour(juce::Colour(0xffb8b8b8));
 		g.setFont(font);
 
 		auto textArea = label.getBorderSize().subtractedFrom(label.getLocalBounds());

@@ -66,6 +66,10 @@
               file="Source/GUI/SwitchLookAndFeel.cpp"/>
         <FILE id="uuZm5J" name="SwitchLookAndFeel.h" compile="0" resource="0"
               file="Source/GUI/SwitchLookAndFeel.h"/>
+        <FILE id="oLYlwo" name="TooltipTextBox.cpp" compile="1" resource="0"
+              file="Source/GUI/TooltipTextBox.cpp"/>
+        <FILE id="Y7pWVG" name="TooltipTextBox.h" compile="0" resource="0"
+              file="Source/GUI/TooltipTextBox.h"/>
       </GROUP>
       <GROUP id="{A1A7B4F5-99A3-3B37-5E0D-5F12FB9489D8}" name="Processor">
         <FILE id="SVs2bK" name="PluginEditor.cpp" compile="1" resource="0"

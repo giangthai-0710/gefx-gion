@@ -8,6 +8,8 @@ LookAndFeel::GeneralLNF::GeneralLNF()
     defaultBackgroundColour = juce::Colours::black;
 
     defaultTooltipOutlineColour = juce::Colours::white;
+
+	setColour(juce::PopupMenu::backgroundColourId, juce::Colour(0xff1A1A1A));
 }
 
 LookAndFeel::GeneralLNF::~GeneralLNF()

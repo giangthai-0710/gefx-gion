@@ -8,7 +8,10 @@ GUI::Knob::Knob()
     setLookAndFeel(&knobLookAndFeel);
     setPopupDisplayEnabled(true, false , nullptr, -1);
 	setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+	
 	knobType = "null";
+
+	addMouseListener(this, true);
 }
 
 GUI::Knob::~Knob()
@@ -63,6 +66,32 @@ juce::String GUI::Knob::getTextFromValue(double value)
 		return juce::String(value, 2);
 	}
 }
+
+void GUI::Knob::create(float minValue, float maxValue, float stepValue, float defaultValue, juce::String knobSize, juce::String knobType, juce::String knobDescription)
+{
+	setRange(minValue, maxValue, stepValue);
+	setValue(defaultValue);
+	setKnobSize(knobSize);
+	setKnobType(knobType);
+	setDescription(knobDescription);
+
+}
+
+void GUI::Knob::mouseEnter(const juce::MouseEvent& event)
+{
+	isMouseOver = true;
+}
+
+void GUI::Knob::mouseExit(const juce::MouseEvent& event)
+{
+	isMouseOver = false;
+}
+
+bool GUI::Knob::hasMouseOver()
+{
+	return isMouseOver;
+}
+
 
 
 

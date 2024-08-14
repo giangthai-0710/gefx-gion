@@ -21,7 +21,15 @@ namespace GUI
             repaint(); // Repaint the button
         }
 
+        void mouseEnter(const juce::MouseEvent& event) override;
+        
+        void mouseExit(const juce::MouseEvent& event) override;
+
+        bool hasMouseOver();
+
     private:
+        bool isMouseOver = false;
+
         juce::Image switchImage, switchPressedImage;
 
         bool isPressed = false;
