@@ -8,7 +8,7 @@ This is the first entry in the GeFX plugin collection: GiON – a versatile dist
 Getting GiON
 ============
 
-You can download GiON here. As of now, only VST3 is supported.
+You can download GiON [here](https://github.com/giangthai-0710/gefx-gion/releases/tag/v1.0.0). As of now, only VST3 is supported.
 
 Using GiON
 ==========
@@ -37,8 +37,8 @@ Save/Load Presets
 
 Building GiON
 =============
-Prerequisites
+Requirements
 -------------
 - JUCE v7.0.11 or newer. You can get JUCE [here](https://juce.com/download/).
 - C++17 compiler.
-- An IDE of your choice. This project is built with VisualStudio2022, so if you want to use another IDE you need to change it in the [project file](Source/GION.jucer)
+- An IDE of your choice. This project is built with VisualStudio2022, so if you want to use another IDE you need to change it in the [project file](Source/GION.jucer).
