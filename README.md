@@ -42,3 +42,7 @@ Requirements
 - JUCE v7.0.11 or newer. You can get JUCE [here](https://juce.com/download/).
 - C++17 compiler.
 - An IDE of your choice. This project is built with VisualStudio2022, so if you want to use another IDE you need to change it in the [project file](Source/GION.jucer).
+
+License
+=======
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/giangthai-0710/gefx-gion/blob/master/LICENSE) file for details
