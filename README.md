@@ -10,6 +10,8 @@ Getting GiON
 
 You can download GiON [here](https://github.com/giangthai-0710/gefx-gion/releases/tag/v1.0.0). As of now, only VST3 is supported.
 
+Using GiON is very simple: Just open a DAW of your choice, select GiON from the plugin list and **CRUNCH!**
+
 Using GiON
 ==========
 
