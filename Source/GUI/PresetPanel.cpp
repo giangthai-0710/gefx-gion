@@ -112,13 +112,11 @@ bool GUI::PresetPanel::keyPressed(const juce::KeyPress& key, juce::Component* or
 {
 	if (key == juce::KeyPress::rightKey)
 	{
-		DBG("Right key pressed");
 		nextPresetButton.triggerClick();
 		
 	}
 	else if (key == juce::KeyPress::leftKey)
 	{
-		DBG("Left key pressed");
 		previousPresetButton.triggerClick();
 	}
 	return false;

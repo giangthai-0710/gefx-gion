@@ -107,7 +107,8 @@ private:
 
     juce::dsp::StateVariableTPTFilter<float> antiAliasingFilter, 
                                              preGainHighPassFilter, 
-                                             postGainLowPassFilter;
+                                             firstPostGainLowPassFilter,
+                                             secondPostGainLowPassFilter;
     juce::dsp::ProcessSpec processSpec;
 
     //==============================================================================
