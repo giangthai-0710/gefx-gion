@@ -33,9 +33,6 @@ void GiONAudioProcessorComponent::timerCallback()
     setTooltipText();
 }
 
-void GiONAudioProcessorComponent::mouseEnter(const juce::MouseEvent& event)
-{
-}
 
 void GiONAudioProcessorComponent::createKnobs()
 {

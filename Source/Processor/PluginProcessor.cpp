@@ -14,7 +14,7 @@ GiONAudioProcessor::GiONAudioProcessor()
                        )
 #endif 
 {
-    antiAliasingFilter.setCutoffFrequency(12000.0f);
+    antiAliasingFilter.setCutoffFrequency(5000.0f);
     antiAliasingFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
     antiAliasingFilter.setResonance(0.7071f);
 
@@ -22,9 +22,13 @@ GiONAudioProcessor::GiONAudioProcessor()
     preGainHighPassFilter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
     preGainHighPassFilter.setResonance(0.7071f);
 
-    postGainLowPassFilter.setCutoffFrequency(8000.0f);
-    postGainLowPassFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-    postGainLowPassFilter.setResonance(0.7071f);
+    firstPostGainLowPassFilter.setCutoffFrequency(5000.0f);
+    firstPostGainLowPassFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+    firstPostGainLowPassFilter.setResonance(1.f);
+
+    secondPostGainLowPassFilter.setCutoffFrequency(5000.0f);
+    secondPostGainLowPassFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+    secondPostGainLowPassFilter.setResonance(1.1f);
 
     distortionStage.setDistortionStage(1);
 
@@ -112,8 +116,11 @@ void GiONAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     preGainHighPassFilter.prepare(processSpec);
     preGainHighPassFilter.reset();
 
-    postGainLowPassFilter.prepare(processSpec);
-    postGainLowPassFilter.reset();
+    firstPostGainLowPassFilter.prepare(processSpec);
+    firstPostGainLowPassFilter.reset();
+
+    secondPostGainLowPassFilter.prepare(processSpec);
+    secondPostGainLowPassFilter.reset();
 
     preLeftFilter.prepare(processSpec);
     preRightFilter.prepare(processSpec);
@@ -184,14 +191,14 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     buffer.applyGain(parameters.distortionGain);
     distortionLevelLeft = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     distortionLevelRight = buffer.getRMSLevel(1, 0, buffer.getNumSamples());
-    distortionLevel = (distortionLevelLeft + distortionLevelRight);
+    distortionLevel = (distortionLevelLeft + distortionLevelRight) / 2;
     buffer.applyGain(1.0f / parameters.distortionGain);
 
 
     if (!parameters.distortionBypass)
     {
         // Anti-aliasing filter
-		antiAliasingFilter.process(myContext);
+        antiAliasingFilter.process(myContext);
 
         // High-pass filter to remove low frequencies
         preGainHighPassFilter.process(myContext);
@@ -199,6 +206,11 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         // Pre-distortion tone shaping
         preLeftFilter.process(leftContext);
         preRightFilter.process(rightContext);
+
+        if (parameters.distortionStage == true && parameters.distortionGain >= 3.0f)
+        {
+            buffer.applyGain(2.0f);
+        }
 
         // Distortion stage
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -209,13 +221,13 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 				channelData[sample] = distortionStage.process(channelData[sample]);
 			}
 		}
-
-        // Low-pass filter to remove noise
-        postGainLowPassFilter.process(myContext);
-
         // Post-distortion tone shaping
         postLeftFilter.process(leftContext);
         postRightFilter.process(rightContext);
+
+        // Low-pass filter to remove noise
+        firstPostGainLowPassFilter.process(myContext);
+        secondPostGainLowPassFilter.process(myContext);
 	}
 }
 
@@ -305,6 +317,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
     layout.add(std::make_unique<juce::AudioParameterBool>("distortionStage",
                                                           "Distortion Stage",
 														   false));
+
     return layout;
 }
 
