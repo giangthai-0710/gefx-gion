@@ -3,7 +3,8 @@
 <JUCERPROJECT id="i6SGwt" name="GiON" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyName="Gezell Sounds"
               headerPath="&quot;C:\JUCE\asiosdk_2.3.3_2019-06-14\common&quot;"
-              pluginVST3Category="Distortion,Fx" pluginFormats="buildStandalone,buildVST3">
+              pluginVST3Category="Distortion,Fx" pluginFormats="buildStandalone,buildVST3"
+              version="1.1.0">
   <MAINGROUP id="GlSkZF" name="GiON">
     <GROUP id="{1D5851A1-F3EF-087E-5EE7-4ED067BA5845}" name="Source">
       <GROUP id="{D43297CB-3B86-9DE6-E432-197FEFF689F4}" name="Asset">
