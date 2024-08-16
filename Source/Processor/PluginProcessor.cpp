@@ -271,7 +271,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("gain",
                                                            "Gain",
-                                                           juce::NormalisableRange<float>(-6.0f, 15.0f, 0.1f),
+                                                           juce::NormalisableRange<float>(-6.0f, 18.0f, 0.1f),
                                                            0.0f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("crunch", 
@@ -281,7 +281,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout GiONAudioProcessor::createPa
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("volume",
                                                            "Volume",
-                                                           juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
+                                                           juce::NormalisableRange<float>(-18.0f, 18.0f, 0.1f),
                                                            0.0f));
 
     // Filters
