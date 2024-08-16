@@ -8,7 +8,7 @@ This is the first entry in the GeFX plugin collection: GiON – a versatile dist
 Getting GiON
 ============
 
-You can download GiON [here](https://github.com/giangthai-0710/gefx-gion/releases/tag/v1.0.0). As of now, only VST3 is supported.
+You can download GiON [here](https://github.com/giangthai-0710/gefx-gion/releases/latest). As of now, only VST3 is supported.
 
 Using GiON
 ==========
