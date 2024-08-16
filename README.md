@@ -44,6 +44,7 @@ Requirements
 - JUCE v7.0.11 or newer. You can get JUCE [here](https://juce.com/download/).
 - C++17 compiler.
 - An IDE of your choice. This project is built with VisualStudio2022, so if you want to use another IDE you need to change it in the [project file](Source/GION.jucer).
+- ASIO SDK 2.3.3 or newer. You need to enable ASIO support using [these steps](https://forum.juce.com/t/basic-asio-setup-producing-error-cannot-open-include-file-iasiodrv-h/32888/5).
 
 License
 =======
