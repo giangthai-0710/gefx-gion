@@ -41,79 +41,25 @@ namespace DSP
 
         //==============================================================================
         // Processes the sample before applying the distortion effect
-        float preGainProcessing(float sample)
-        {
+        float preGainProcessing(float sample);
 
-            return 5.0f * gain * sample;
-        }
-
-        //==============================================================================
         // Clean, soft boost 
-        float softestDistortion(float sample)
-        {
-            return (2.0f / pi) * std::atan(pi / 2 * sample);
-        }
+        float softestDistortion(float sample);
 
         // Light overdrive 
-        float softDistortion(float sample)
-        {
-
-            return std::tanh(sample);
-        }
+        float softDistortion(float sample);
 
         // Medium soft clipping overdrive
-        float mediumDistortion(float sample)
-        {
-            return std::erf(sample * 1.414f);
-        }
+        float mediumDistortion(float sample);
 
         // Hard clipping overdrive
-        float hardDistortion(float sample)
-        {
-            if (sample >= 0.66f)
-            {
-                return 1.0f;
-            }
-            else if (sample <= 0.66f && sample >= 0.33f)
-            {
-                return (3.0f - std::pow(2.0f - 3.0f * sample, 2)) / 3.0f;
-            }
-            else if (sample <= 0.33f && sample >= -0.33f)
-            {
-                return 2.0f * sample;
-            }
-            else if (sample <= -0.33f && sample >= -0.66f)
-            {
-                return (-3.0f + std::pow(2.0f + 3.0f * sample, 2)) / 3.0f;
-            }
-            else
-            {
-                return -1.0f;
-            }
-        }
+        float hardDistortion(float sample);
 
         // Hardest clipping overdrive
-        float hardestDistortion(float sample)
-        {
-            if (sample >= 0.2f)
-            {
-                return 1.0f;
-            }
-            else if (sample <= 0.2f && sample >= -0.2f)
-            {
-                return 5.0f * sample;
-            }
-            else
-            {
-                return -1.0f;
-            }
-        }
+        float hardestDistortion(float sample);
 
         //==============================================================================
         // Interpolates between two distortion values
-        float interpolateValue(float valueA, float valueB, float ratio)
-        {
-            return valueA + (valueB - valueA) * ratio;
-        }
+        float interpolateValue(float valueA, float valueB, float ratio);
     };
 }
