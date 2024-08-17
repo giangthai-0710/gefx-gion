@@ -191,7 +191,7 @@ void GiONAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     buffer.applyGain(parameters.distortionGain);
     distortionLevelLeft = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     distortionLevelRight = buffer.getRMSLevel(1, 0, buffer.getNumSamples());
-    distortionLevel = (distortionLevelLeft + distortionLevelRight) / 2;
+    distortionLevel = (distortionLevelLeft + distortionLevelRight) / 4;
     buffer.applyGain(1.0f / parameters.distortionGain);
 
 
